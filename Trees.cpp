@@ -1261,9 +1261,240 @@ vector<TreeNode *> findDuplicateSubtrees(TreeNode *root)
     return ans;
 }
 
+// 1123. Lowest Common Ancestor of Deepest Leaves
+TreeNode *LCA;
+TreeNode *firstLeafNode;
+int height(TreeNode *root)
+{
+    if (root == nullptr)
+        return -1;
+    return max(height(root->left), height(root->right)) + 1;
+}
+bool findLCA(TreeNode *root, int depth, int maxDepth)
+{
+    if (root == nullptr)
+        return false;
+    if (depth == maxDepth)
+    {
+        if (firstLeafNode == nullptr)
+            firstLeafNode = root;
+        return true;
+    }
+
+    //cannot return after first time an lca has been found as the lca closest to root is the ans as many paths can give deepest leaves
+    bool leftDone = findLCA(root->left, depth + 1, maxDepth);
+    bool rightDone = findLCA(root->right, depth + 1, maxDepth);
+
+    //the very last root to be set as the lca will be the ans, as many roots can have both leftDone==true and rightDone==true
+    //but there may be more deepest leaves in other subtrees
+    if (leftDone && rightDone)
+        LCA = root;
+
+    return leftDone || rightDone;
+}
+TreeNode *lcaDeepestLeaves(TreeNode *root)
+{
+    //find height of tree -> to know the max depth -> so that deepest leaves can be found
+    int maxDepth = height(root);
+
+    //find lca
+    findLCA(root, 0, maxDepth);
+
+    //if lca has been found
+    if (LCA != nullptr)
+        return LCA;
+
+    //if lca has not been found -> only one deepest leaf exists -> it is the lca
+    return firstLeafNode;
+}
+
+// 979. Distribute Coins in Binary Tree
+int moves;
+int distributeCoins_(TreeNode *root)
+{
+    if (root == nullptr)
+        return 0;
+
+    int leftCoins = distributeCoins_(root->left);
+    int rightCoins = distributeCoins_(root->right);
+
+    moves += abs(leftCoins) + abs(rightCoins);
+
+    return root->val + leftCoins + rightCoins - 1;
+}
+int distributeCoins(TreeNode *root)
+{
+    moves = 0;
+    distributeCoins_(root);
+    return moves;
+}
+
+// 1145. Binary Tree Coloring Game
+int countNodes(TreeNode *root)
+{
+    if (root == nullptr)
+        return 0;
+
+    return countNodes(root->left) + countNodes(root->right) + 1;
+}
+TreeNode *findNode(TreeNode *root, int data)
+{
+    if (root == nullptr)
+        return root;
+    if (root->val == data)
+        return root;
+
+    TreeNode *leftFind = findNode(root->left, data);
+    if (leftFind != nullptr)
+        return leftFind;
+
+    TreeNode *rightFind = findNode(root->right, data);
+    if (rightFind != nullptr)
+        return rightFind;
+
+    return nullptr;
+}
+bool btreeGameWinningMove(TreeNode *root, int n, int x)
+{
+    int totalNodes = n;
+    TreeNode *xNode = findNode(root, x);
+    int leftCount = countNodes(xNode->left);
+    int rightCount = countNodes(xNode->right);
+    int parCount = n - leftCount - rightCount - 1;
+
+    return leftCount > n / 2 || rightCount > n / 2 || parCount > n / 2;
+}
+
+// 1325. Delete Leaves With a Given Value
+TreeNode *removeLeafNodes(TreeNode *root, int target)
+{
+    if (root == nullptr)
+        return nullptr;
+    if (root->val == target && root->left == nullptr && root->right == nullptr)
+        return nullptr;
+
+    root->left = removeLeafNodes(root->left, target);
+    root->right = removeLeafNodes(root->right, target);
+
+    if (root->val == target && root->left == nullptr && root->right == nullptr)
+        return nullptr;
+
+    return root;
+}
+
+// 1104. Path In Zigzag Labelled Binary Tree
+//TLE(if we construct tree)
+bool findPath(TreeNode *root, int tar, vector<int> &path)
+{
+    if (root == nullptr)
+        return false;
+    if (root->val == tar)
+    {
+        path.push_back(root->val);
+        return true;
+    }
+
+    bool leftFind = findPath(root->left, tar, path);
+    if (leftFind)
+    {
+        path.push_back(root->val);
+        return true;
+    }
+
+    bool rightFind = findPath(root->right, tar, path);
+    if (rightFind)
+    {
+        path.push_back(root->val);
+        return true;
+    }
+
+    return false;
+}
+vector<int> pathInZigZagTree(int label)
+{
+    list<TreeNode *> que;
+    TreeNode *root = new TreeNode(1);
+    que.push_back(root);
+
+    //0->fill from front , 1->fill form back
+    int prevMax = 1, prevSize = 1, flag = 1;
+    while (que.size() != 0)
+    {
+        int size = que.size();
+
+        //set before each level
+        int lb = prevMax + 1;
+        prevSize *= 2;
+        int ub = lb + prevSize - 1;
+        int firstele = flag == 0 ? lb : ub;
+
+        while (size-- > 0)
+        {
+            TreeNode *rnode = que.front();
+            que.pop_front();
+
+            if (flag == 0)
+            {
+                rnode->left = new TreeNode(firstele);
+                rnode->right = new TreeNode(firstele + 1);
+                firstele += 2;
+            }
+            else
+            {
+                rnode->left = new TreeNode(firstele);
+                rnode->right = new TreeNode(firstele - 1);
+                firstele -= 2;
+            }
+
+            que.push_back(rnode->left);
+            que.push_back(rnode->right);
+        }
+
+        //update after each level
+        prevMax = ub;
+        flag ^= 1;
+        if (prevMax > label)
+            break;
+    }
+
+    vector<int> path;
+    findPath(root, label, path);
+    reverse(path.begin(), path.end());
+    return path;
+}
+
+//instead we use properties of full binary tree (O(logn))
+vector<int> pathInZigZagTree(int label)
+{
+    vector<int> path;
+    int level = 1, temp = label;
+
+    //find the total levels
+    while (temp != 1)
+    {
+        temp /= 2;
+        level++;
+    }
+
+    //find path from last level to root
+    while (label != 1)
+    {
+        path.push_back(label);
+        int maxVal = pow(2, level) - 1;
+        int minVal = pow(2, level - 1);
+        int par = (minVal + maxVal - label) / 2;
+        label = par;
+        level--;
+    }
+    path.push_back(1);
+    reverse(path.begin(), path.end());
+    return path;
+}
+
 // ===============================================================================================================================
 void solve()
 {
+    pathInZigZagTree(14);
 }
 int main()
 {
