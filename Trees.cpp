@@ -1491,6 +1491,12 @@ vector<int> pathInZigZagTree(int label)
     return path;
 }
 
+// 1443. Minimum Time to Collect All Apples in a Tree
+int minTime(int n, vector<vector<int>> &edges, vector<bool> &hasApple)
+{
+    
+}
+
 // ===============================================================================================================================
 void solve()
 {
