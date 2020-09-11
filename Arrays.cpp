@@ -690,7 +690,71 @@ int maxProfit(vector<int> &prices)
 }
 
 // 714. Best Time to Buy and Sell Stock with Transaction Fee
+int maxProfit(vector<int> &prices, int fee)
+{
+    if (prices.size() == 0)
+        return 0;
 
+    int maxAfterBuy = -prices[0]; //current cash in hand after buying
+    int maxAfterSell = 0;         //current cash in hand after selling
+    for (int i = 1; i < prices.size(); i++)
+    {
+        maxAfterBuy = max(maxAfterBuy, maxAfterSell - prices[i]);
+        maxAfterSell = max(maxAfterSell, maxAfterBuy + prices[i] - fee);
+    }
+
+    return maxAfterSell;
+}
+
+// 309. Best Time to Buy and Sell Stock with Cooldown
+int maxProfit(vector<int> &prices)
+{
+    if (prices.size() == 0)
+        return 0;
+
+    int maxAfterBuy = -prices[0]; //current cash in hand after buying
+    int maxAfterSell = 0;         //current cash in hand after selling
+    int prevMaxSell = 0;    //max cash after cooldown(stores the max sell just before cooldown)
+    for (int i = 1; i < prices.size(); i++)
+    {
+        int prevMaxBuy = maxAfterBuy;
+        maxAfterBuy = max(maxAfterBuy, prevMaxSell - prices[i]);
+        prevMaxSell = maxAfterSell;
+        maxAfterSell = max(maxAfterSell, prevMaxBuy + prices[i]);
+    }
+
+    return maxAfterSell;
+}
+
+// Maximum Difference (given that second element is greater than first element)
+int maxDiff(vector<int> &prices)
+{
+    if (prices.size() == 0)
+        return 0;
+    int maxp = 0, minSoFar = prices[0];
+    for (int i = 0; i < prices.size(); i++)
+    {
+        minSoFar = min(minSoFar, prices[i]);
+        maxp = max(maxp, prices[i] - minSoFar);
+    }
+
+    //if no secondEle > firstEle then return -1
+    return maxp == 0 ? -1 : maxp;
+}
+int maxDiff()
+{
+    int t;
+    cin >> t;
+    while (t-- > 0)
+    {
+        int n;
+        cin >> n;
+        vector<int> arr(n);
+        for (int i = 0; i < n; i++)
+            cin >> arr[i];
+        cout << maxDiff(arr) << endl;
+    }
+}
 
 void solve()
 {
