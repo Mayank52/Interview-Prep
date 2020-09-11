@@ -3,6 +3,7 @@
 #include <list>
 #include <algorithm>
 #include <queue>
+#include <unordered_map>
 
 using namespace std;
 
@@ -433,14 +434,14 @@ int search_01(vector<int> &nums, int target)
 
     //find which region target lies in
     int pivot = lo;
-    lo=0,hi=nums.size()-1;
-    if (target<=nums[hi])
+    lo = 0, hi = nums.size() - 1;
+    if (target <= nums[hi])
     { //right half of pivot
         lo = pivot;
     }
     else
     { //left half of pivot
-        hi = pivot-1;
+        hi = pivot - 1;
     }
 
     //normal binary search in that region
@@ -487,6 +488,73 @@ int search_02(vector<int> &nums, int target)
     }
     return -1;
 }
+
+// Given a sorted and rotated array, find if there is a pair with a given sum(Not available for submission)
+bool pairSum(vector<int> &nums, int target)
+{
+    //find pivot
+    int lo = 0, hi = nums.size() - 1;
+    long mid;
+    while (lo < hi)
+    {
+        mid = (lo + hi) / 2;
+        if (nums[mid] < nums[hi])
+            hi = mid;
+        else
+            lo = mid + 1;
+    }
+
+    //use 2 pointer method(meet in the middle) using mod to keep index in range
+    int pivot = lo, n = nums.size();
+    int i = lo, j = pivot - 1;
+    //i goes pivot -> n-1 , j goes pivot-1 -> 0
+    while (i != j)
+    {
+        if (nums[i] + nums[j] < target)
+        {
+            //to keep i++ in range
+            i = (i + 1) % n;
+        }
+        else if (nums[i] + nums[j] > target)
+        {
+            //to keep j-- in range
+            j = (n + j - 1) % n;
+        }
+        else
+            return true;
+    }
+
+    return false;
+}
+
+// 525. Contiguous Array
+/*
+we do count-- for 0s, and count++ for 1s
+keep a map for count:index values
+two index where count is equal, will have equal number of 0s and 1s, so at each index we just check 
+if this count value is present in map and update the max subarray length
+*/
+int findMaxLength(vector<int> &nums)
+{
+    int count = 0, maxlen = 0;
+    unordered_map<int, int> mp; //{count:index}
+    mp[0] = -1;
+    for (int i = 0; i < nums.size(); i++)
+    {
+        if (nums[i] == 0)
+            count--;
+        else
+            count++;
+        if (mp.find(count) != mp.end())
+            maxlen = max(maxlen, i - mp[count]);
+        else
+            mp[count] = i;
+    }
+    return maxlen;
+}
+
+
+
 
 void solve()
 {
