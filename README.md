@@ -1,2 +1,2 @@
 # Interview-Prep
-LeetCode questions I practiced to prepare for DSA interviews
+300+ LeetCode, Geeks4Geeks questions I practiced to prepare for DSA interviews
