@@ -553,7 +553,143 @@ int findMaxLength(vector<int> &nums)
     return maxlen;
 }
 
+// 121. Best Time to Buy and Sell Stock
+/*
+Just find the max diff in array
+Keep a min so far for each element, and update the maxProfit with the max diff i.e arr[i]-minSoFar
+*/
+int maxProfit(vector<int> &prices)
+{
+    if (prices.size() == 0)
+        return 0;
+    int maxp = 0, minSoFar = prices[0];
+    for (int i = 0; i < prices.size(); i++)
+    {
+        minSoFar = min(minSoFar, prices[i]);
+        maxp = max(maxp, prices[i] - minSoFar);
+    }
 
+    return maxp;
+}
+
+// 122. Best Time to Buy and Sell Stock II
+/*
+Approach 1-
+while the price keeps increasing keep adding it to profit,
+when it decreases, dont include it
+*/
+int maxProfit(vector<int> &prices)
+{
+    if (prices.size() == 0)
+        return 0;
+    int totalProfit = 0;
+    for (int i = 0; i < prices.size() - 1; i++)
+    {
+        if (prices[i + 1] > prices[i])
+            totalProfit += (prices[i + 1] - prices[i]);
+    }
+    return totalProfit;
+}
+/*
+Approach 2-
+keep a currMin (for the current rise in price),
+the moment the price drops, you sell the stock and add arr[i]-currMin into the total profit
+*/
+int maxProfit(vector<int> &prices)
+{
+    if (prices.size() == 0)
+        return 0;
+    int currMin = prices[0], totalProfit = 0;
+    for (int i = 0; i < prices.size() - 1; i++)
+    {
+        if (prices[i] > prices[i + 1])
+        {
+            totalProfit += prices[i] - currMin;
+            currMin = prices[i + 1];
+        }
+    }
+    totalProfit += prices[prices.size() - 1] - currMin;
+
+    return totalProfit;
+}
+
+// 123. Best Time to Buy and Sell Stock III
+/*Approach 1-
+Make a prefix and suffix array
+Prefix- Stock is sold on this day
+Suffix- Stock is bought on this day
+
+Then the max profit the max sum of prefix and suffix arrays
+*/
+int maxProfit(vector<int> &prices)
+{
+    if (prices.size() == 0)
+        return 0;
+
+    int n = prices.size();
+    vector<int> prefix(n), suffix(n);
+
+    //we can maintain the max Profit so far seperatly,
+    /*
+    int minBuying = prices[0], maxProfitSoFar = 0;
+    for (int i = 0; i < n; i++)
+    {
+        minBuying = min(prices[i], minBuying);
+        maxProfitSoFar = max(maxProfitSoFar, prices[i] - minBuying);
+        prefix[i] = maxProfitSoFar;
+    }
+
+    int maxSelling = prices[n - 1];
+    maxProfitSoFar = 0;
+    for (int i = n - 1; i >= 0; i--)
+    {
+        maxSelling = max(maxSelling, prices[i]);
+        maxProfitSoFar = max(maxProfitSoFar, maxSelling - prices[i]);
+        suffix[i] = maxProfitSoFar;
+    }
+    */
+
+    //or we can just use the value in i-1 index, as it already has the max value upto that point
+    int minBuying = prices[0];
+    prefix[0] = 0;
+    for (int i = 1; i < n; i++)
+    {
+        minBuying = min(prices[i], minBuying);
+        prefix[i] = max(prefix[i - 1], prices[i] - minBuying);
+    }
+
+    int maxSelling = prices[n - 1];
+    suffix[n - 1] = 0;
+    for (int i = n - 2; i >= 0; i--)
+    {
+        maxSelling = max(maxSelling, prices[i]);
+        suffix[i] = max(suffix[i + 1], maxSelling - prices[i]);
+    }
+
+    int maxp = 0;
+    for (int i = 0; i < n; i++)
+    {
+        maxp = max(maxp, prefix[i] + suffix[i]);
+    }
+
+    return maxp;
+}
+
+//Approach 2 (faster)-
+int maxProfit(vector<int> &prices)
+{
+    int sell1 = 0, sell2 = 0, buy1 = 1e8, buy2 = 1e8;
+    for (int i = 0; i < prices.size(); i++)
+    {
+        buy1 = min(buy1, prices[i]);
+        sell1 = max(sell1, prices[i] - buy1);
+        buy2 = min(buy2, prices[i] - sell1);
+        sell2 = max(sell2, prices[i] - buy2);
+    }
+    return sell2;
+}
+
+// 714. Best Time to Buy and Sell Stock with Transaction Fee
 
 
 void solve()
