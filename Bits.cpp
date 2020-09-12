@@ -121,6 +121,56 @@ int countTriplets(vector<int> &arr)
     return triplets;
 }
 
+// 1239. Maximum Length of a Concatenated String with Unique Characters
+int maxLen;
+void maxLength(int idx, int currMask, int len, vector<int> &masks, vector<int> &setBits)
+{
+    if (idx == masks.size())
+    {
+        maxLen = max(maxLen, len);
+        return;
+    }
+
+    //if including this word makes of string of all unique characters
+    if ((masks[idx] & currMask) == 0)
+        maxLength(idx + 1, currMask | masks[idx], len + setBits[idx], masks, setBits);
+
+    //if it does not
+    maxLength(idx + 1, currMask, len, masks, setBits);
+}
+int maxLength(vector<string> &arr)
+{
+    maxLen = 0;
+    int n = arr.size();
+
+    //masks: array of all bitmasks of words with all unique characters
+    //setBits: count of all set bits in the bitmasks, as we are already counting them to check unique bits
+    vector<int> masks, setBits;
+    for (int i = 0; i < n; i++)
+    {
+        int mask = 0, count = 0;
+        for (char c : arr[i])
+        {
+            int pos = 1 << (int)(c - 'a');
+            //if character is unique, add it to bitmask
+            if ((mask & pos) == 0)
+            {
+                mask |= pos;
+                count++;
+            }
+        }
+        //if all characters were unique, add it to array
+        if (count == arr[i].size())
+        {
+            masks.push_back(mask);
+            setBits.push_back(count);
+        }
+    }
+
+    maxLength(0, 0, 0, masks, setBits);
+    return maxLen;
+}
+
 void solve()
 {
 }

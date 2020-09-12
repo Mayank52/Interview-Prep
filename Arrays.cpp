@@ -689,6 +689,118 @@ int maxProfit(vector<int> &prices)
     return sell2;
 }
 
+// 188. Best Time to Buy and Sell Stock IV
+int maxp; //max profit
+//shares==1 -> have an extra share, so can only sell
+//shares==0 -> dont have a share so can ony buy
+//Recursion
+//void type
+void maxProfit_rec1(int shares, int profit, int K, int idx, vector<int> &prices)
+{
+    maxp = max(maxp, profit);
+    if (K == 0 || idx == prices.size())
+    {
+        return;
+    }
+
+    //buy
+    if (shares == 0)
+    {
+        maxProfit_rec1(1, profit - prices[idx], K, idx + 1, prices);
+    }
+
+    //sell
+    else
+    {
+        maxProfit_rec1(0, profit + prices[idx], K - 1, idx + 1, prices);
+    }
+
+    //do nothing
+    maxProfit_rec1(shares, profit, K, idx + 1, prices);
+}
+
+//return type
+int maxProfit_rec2(int shares, int profit, int K, int idx, vector<int> &prices)
+{
+
+    if (K == 0 || idx == prices.size())
+    {
+        return profit;
+    }
+
+    int maxp = 0;
+    //buy
+    if (shares == 0)
+    {
+        maxp = max(maxp, maxProfit_rec2(1, profit - prices[idx], K, idx + 1, prices));
+    }
+
+    //sell
+    else
+    {
+        maxp = max(maxp, maxProfit_rec2(0, profit + prices[idx], K - 1, idx + 1, prices));
+    }
+
+    //do nothing
+    maxp = max(maxp, maxProfit_rec2(shares, profit, K, idx + 1, prices));
+
+    return maxp;
+}
+// int maxProfit(int k, vector<int> &prices)
+// {
+//     return maxProfit_rec2(0, 0, k, 0, prices);
+// }
+
+//Memoization
+int maxProfit(int shares, int profit, int K, int idx, vector<int> &prices, vector<vector<vector<int>>> &dp)
+{
+
+    if (K == 0 || idx == prices.size())
+    {
+        return dp[idx][K][shares] = profit;
+    }
+
+    if (dp[idx][K][shares] != -1)
+        return dp[idx][K][shares];
+
+    int maxp = 0;
+    //buy
+    if (shares == 0)
+    {
+        maxp = max(maxp, maxProfit(1, profit - prices[idx], K, idx + 1, prices, dp));
+    }
+
+    //sell
+    else
+    {
+        maxp = max(maxp, maxProfit(0, profit + prices[idx], K - 1, idx + 1, prices, dp));
+    }
+
+    //do nothing
+    maxp = max(maxp, maxProfit(shares, profit, K, idx + 1, prices, dp));
+
+    return dp[idx][K][shares] = maxp;
+}
+int maxProfit_01(int k, vector<int> &prices)
+{
+    int n = prices.size();
+    vector<vector<vector<int>>> dp(n + 1, vector<vector<int>>(k + 1, vector<int>(2, -1)));
+
+    int ans = maxProfit(0, 0, k, 0, prices, dp);
+
+    for (int i = 0; i < n + 1; i++)
+    {
+        for (int j = 0; j < k + 1; j++)
+        {
+            cout << "(" << dp[i][j][0] << "," << dp[i][j][1] << ")"
+                 << " ";
+        }
+        cout << endl;
+    }
+
+    return ans;
+}
+
 // 714. Best Time to Buy and Sell Stock with Transaction Fee
 int maxProfit(vector<int> &prices, int fee)
 {
@@ -714,7 +826,7 @@ int maxProfit(vector<int> &prices)
 
     int maxAfterBuy = -prices[0]; //current cash in hand after buying
     int maxAfterSell = 0;         //current cash in hand after selling
-    int prevMaxSell = 0;    //max cash after cooldown(stores the max sell just before cooldown)
+    int prevMaxSell = 0;          //max cash after cooldown(stores the max sell just before cooldown)
     for (int i = 1; i < prices.size(); i++)
     {
         int prevMaxBuy = maxAfterBuy;
@@ -756,8 +868,80 @@ int maxDiff()
     }
 }
 
+// 56. Merge Intervals
+vector<vector<int>> merge(vector<vector<int>> &intervals)
+{
+    if (intervals.size() == 0)
+        return {};
+
+    vector<vector<int>> res;
+    sort(intervals.begin(), intervals.end());
+    res.push_back(intervals[0]);
+    int j = 0;
+    for (int i = 1; i < intervals.size(); i++)
+    {
+        if (intervals[i][0] <= res[j][1])
+        {
+            res[j][0] = min(res[j][0], intervals[i][0]);
+            res[j][1] = max(res[j][1], intervals[i][1]);
+        }
+        else
+        {
+            res.push_back(intervals[i]);
+            j++;
+        }
+    }
+
+    return res;
+}
+
+// Three way partitioning
+vector<int> threeWayPartition(vector<int> nums, int a, int b)
+{
+    int lt = 0, gt = nums.size() - 1, i = 0;
+    while (i <= gt)
+    {
+        if (nums[i] < a)
+        {
+            swap(nums[lt++], nums[i++]);
+        }
+        else if (nums[i] > b)
+        {
+            swap(nums[gt--], nums[i]);
+        }
+        else
+            i++;
+    }
+
+    return nums;
+}
+
+// 75. Sort Colors (3 Way Partition)
+void sortColors(vector<int> &nums)
+{
+    int lt = 0, gt = nums.size() - 1, i = 0;
+    while (i <= gt)
+    {
+        //left region: i++, lt++ (after swapping element will definitely belong to left region)
+        if (nums[i] < 1)
+        {
+            swap(nums[lt++], nums[i++]);
+        }
+        //right region: only gt-- (because after swapping we could get an element that may belong to left or middle region)
+        else if (nums[i] > 1)
+        {
+            swap(nums[gt--], nums[i]);
+        }
+        //middle region: i++
+        else
+            i++;
+    }
+}
+
 void solve()
 {
+    vector<int> prices{7, 2, 3, 4, 5};
+    maxProfit_01(2, prices);
 }
 int main()
 {
