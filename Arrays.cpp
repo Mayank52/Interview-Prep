@@ -689,7 +689,7 @@ int maxProfit(vector<int> &prices)
     return sell2;
 }
 
-// 188. Best Time to Buy and Sell Stock IV
+// 188. Best Time to Buy and Sell Stock IV (Not Complete)
 int maxp; //max profit
 //shares==1 -> have an extra share, so can only sell
 //shares==0 -> dont have a share so can ony buy
@@ -746,59 +746,9 @@ int maxProfit_rec2(int shares, int profit, int K, int idx, vector<int> &prices)
 
     return maxp;
 }
-// int maxProfit(int k, vector<int> &prices)
-// {
-//     return maxProfit_rec2(0, 0, k, 0, prices);
-// }
-
-//Memoization
-int maxProfit(int shares, int profit, int K, int idx, vector<int> &prices, vector<vector<vector<int>>> &dp)
+int maxProfit(int k, vector<int> &prices)
 {
-
-    if (K == 0 || idx == prices.size())
-    {
-        return dp[idx][K][shares] = profit;
-    }
-
-    if (dp[idx][K][shares] != -1)
-        return dp[idx][K][shares];
-
-    int maxp = 0;
-    //buy
-    if (shares == 0)
-    {
-        maxp = max(maxp, maxProfit(1, profit - prices[idx], K, idx + 1, prices, dp));
-    }
-
-    //sell
-    else
-    {
-        maxp = max(maxp, maxProfit(0, profit + prices[idx], K - 1, idx + 1, prices, dp));
-    }
-
-    //do nothing
-    maxp = max(maxp, maxProfit(shares, profit, K, idx + 1, prices, dp));
-
-    return dp[idx][K][shares] = maxp;
-}
-int maxProfit_01(int k, vector<int> &prices)
-{
-    int n = prices.size();
-    vector<vector<vector<int>>> dp(n + 1, vector<vector<int>>(k + 1, vector<int>(2, -1)));
-
-    int ans = maxProfit(0, 0, k, 0, prices, dp);
-
-    for (int i = 0; i < n + 1; i++)
-    {
-        for (int j = 0; j < k + 1; j++)
-        {
-            cout << "(" << dp[i][j][0] << "," << dp[i][j][1] << ")"
-                 << " ";
-        }
-        cout << endl;
-    }
-
-    return ans;
+    return maxProfit_rec2(0, 0, k, 0, prices);
 }
 
 // 714. Best Time to Buy and Sell Stock with Transaction Fee
