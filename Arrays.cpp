@@ -825,16 +825,21 @@ vector<vector<int>> merge(vector<vector<int>> &intervals)
         return {};
 
     vector<vector<int>> res;
+    //sort the array
     sort(intervals.begin(), intervals.end());
     res.push_back(intervals[0]);
     int j = 0;
+
+    //for each interval check if it overlaps with last one, and add it accordingly
     for (int i = 1; i < intervals.size(); i++)
     {
+        //if it overlaps, merge the two intervals
         if (intervals[i][0] <= res[j][1])
         {
-            res[j][0] = min(res[j][0], intervals[i][0]);
-            res[j][1] = max(res[j][1], intervals[i][1]);
+            res[j][0] = min(res[j][0], intervals[i][0]);    //start will min of both starts
+            res[j][1] = max(res[j][1], intervals[i][1]);    //end will be max of both ends
         }
+        //if it does not overlap, just add it
         else
         {
             res.push_back(intervals[i]);
@@ -890,8 +895,6 @@ void sortColors(vector<int> &nums)
 
 void solve()
 {
-    vector<int> prices{7, 2, 3, 4, 5};
-    maxProfit_01(2, prices);
 }
 int main()
 {
