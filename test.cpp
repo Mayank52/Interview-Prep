@@ -7,62 +7,69 @@
 
 using namespace std;
 
-int maxProfit(int shares, int profit, int K, int idx, vector<int> &prices, vector<vector<vector<int>>> &dp)
+long merge(vector<int> &arr, int si, int mid, int ei)
 {
+    vector<int> res;
+    int i = si, j = mid + 1;
+    int n = mid + 1, m = ei + 1;
+    int count = 0;
 
-    if (K == 0 || idx == prices.size())
+    while (i < n && j < m)
     {
-        return dp[idx][K][shares] = profit;
-    }
-
-    if (dp[idx][K][shares] != -1)
-        return dp[idx][K][shares];
-
-    int maxp = 0;
-    //buy
-    if (shares == 0)
-    {
-        maxp = max(maxp, maxProfit(1, profit - prices[idx], K, idx + 1, prices, dp));
-    }
-
-    //sell
-    else
-    {
-        maxp = max(maxp, maxProfit(0, profit + prices[idx], K - 1, idx + 1, prices, dp));
-    }
-
-    //do nothing
-    return dp[idx][K][shares] = max(maxp, maxProfit(shares, profit, K, idx + 1, prices, dp));
-
-}
-int maxProfit_01(int k, vector<int> &prices)
-{
-    int n = prices.size();
-    vector<vector<vector<int>>> dp(n + 1, vector<vector<int>>(k + 1, vector<int>(2, -1)));
-
-    int ans = maxProfit(0, 0, k, 0, prices, dp);
-
-    for (int i = 0; i < n + 1; i++)
-    {
-        for (int j = 0; j < k + 1; j++)
+        if (arr[i] < arr[j])
+            res.push_back(arr[i++]);
+        else
         {
-            cout << "(" << dp[i][j][0] << "," << dp[i][j][1] << ")"
-                 << " ";
+            res.push_back(arr[j++]);
+            count += n - i;
         }
-        cout << endl;
     }
 
-    return ans;
+    while (i < n)
+        res.push_back(arr[i++]);
+    while (j < m)
+        res.push_back(arr[j++]);
+
+    for (int k = si; k < ei + 1; k++)
+        arr[k] = res[k - si];
+
+    return count;
+}
+int mergeSort(vector<int> &arr, int si, int ei)
+{
+    if (si == ei)
+        return 0;
+
+    long mid = (si + ei) / 2;
+    int lcount = mergeSort(arr, si, mid);
+    int rcount = mergeSort(arr, mid + 1, ei);
+
+    int myCount = merge(arr, si, mid, ei);
+
+    return lcount + rcount + myCount;
+}
+long countInversions(vector<int> &arr)
+{
+    return mergeSort(arr, 0, arr.size() - 1);
 }
 
 void solve()
 {
-    vector<int> prices{7, 2, 3, 4, 5};
-    maxProfit_01(2, prices);
+    int t;
+    cin >> t;
+    while (t-- > 0)
+    {
+        int n;
+        cin >> n;
+        vector<int> arr(n);
+        for (int i = 0; i < n; i++)
+            cin >> arr[i];
+        cout << countInversions(arr) << endl;
+    }
 }
 int main()
 {
-    // g++ Arrays.cpp -o out && ./out < input.txt > output.txt
+    // g++ test.cpp -o out && out < input.txt > output.txt
     solve();
     return 0;
 }

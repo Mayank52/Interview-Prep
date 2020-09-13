@@ -836,8 +836,8 @@ vector<vector<int>> merge(vector<vector<int>> &intervals)
         //if it overlaps, merge the two intervals
         if (intervals[i][0] <= res[j][1])
         {
-            res[j][0] = min(res[j][0], intervals[i][0]);    //start will min of both starts
-            res[j][1] = max(res[j][1], intervals[i][1]);    //end will be max of both ends
+            res[j][0] = min(res[j][0], intervals[i][0]); //start will min of both starts
+            res[j][1] = max(res[j][1], intervals[i][1]); //end will be max of both ends
         }
         //if it does not overlap, just add it
         else
@@ -893,6 +893,123 @@ void sortColors(vector<int> &nums)
     }
 }
 
+// 912. Sort an Array
+void mergeSort(vector<int> &arr, int si, int ei)
+{
+    if (si == ei)
+        return;
+
+    long mid = (si + ei) / 2;
+    mergeSort(arr, si, mid);
+    mergeSort(arr, mid + 1, ei);
+
+    merge(arr, si, mid, ei);
+}
+void merge(vector<int> &arr, int si, int mid, int ei)
+{
+    //make a temp res array, to store sorted list, then copy it into original array
+    //size of res= ei-si+1, but it will be initialized by zero if you provide size,
+    // so will have to use an index instead of push_back
+    vector<int> res;
+    int i = si, j = mid + 1;     //start index of both halfs
+    int n = mid + 1, m = ei + 1; //end index of both halfs
+
+    while (i < n && j < m)
+    {
+        if (arr[i] < arr[j])
+            res.push_back(arr[i++]);
+        else
+            res.push_back(arr[j++]);
+    }
+
+    while (i < n)
+        res.push_back(arr[i++]);
+    while (j < m)
+        res.push_back(arr[j++]);
+
+    for (int k = si; k < ei + 1; k++)
+        arr[k] = res[k - si];
+}
+vector<int> sortArray(vector<int> &nums)
+{
+    mergeSort(nums, 0, nums.size() - 1);
+    return nums;
+}
+
+// Inversion of array
+long merge_(vector<int> &arr, int si, int mid, int ei)
+{
+    vector<int> res;
+    int i = si, j = mid + 1;
+    int n = mid + 1, m = ei + 1;
+    long count = 0;
+
+    while (i < n && j < m)
+    {
+        if (arr[i] <= arr[j])
+            res.push_back(arr[i++]);
+        else
+        {
+            res.push_back(arr[j++]);
+            //when the element in first subarray > element in second subarray, then there is an inversion
+            count += n - i;
+        }
+    }
+
+    while (i < n)
+        res.push_back(arr[i++]);
+    while (j < m)
+        res.push_back(arr[j++]);
+
+    for (int k = si; k < ei + 1; k++)
+        arr[k] = res[k - si];
+
+    return count;
+}
+long mergeSort_(vector<int> &arr, int si, int ei)
+{
+    if (si == ei)
+        return 0;
+
+    long mid = (si + ei) / 2;
+    long lcount = mergeSort_(arr, si, mid);
+    long rcount = mergeSort_(arr, mid + 1, ei);
+
+    long myCount = merge_(arr, si, mid, ei);
+
+    return lcount + rcount + myCount;
+}
+long countInversions(vector<int> &arr)
+{
+    return mergeSort_(arr, 0, arr.size() - 1);
+}
+
+// 775. Global and Local Inversions
+/*
+Local inverions will occur between consecutive elements only, 
+so if there is a single inversion not between consecutive elements, 
+then there will be more global than local inversions.
+
+All local inversions are global inversions.
+If the number of global inversions is equal to the number of local inversions,
+it means that all global inversions in permutations are local inversions.
+It also means that we can not find A[i] > A[j] with i+2<=j.
+meaning for global==local to be true, inversions can only be between i,i+1
+*/
+bool isIdealPermutation(vector<int> &A)
+{
+    if (A.size() < 2)
+        return true;
+    int currMax = 0;
+    for (int i = 0; i < A.size() - 2; i++)
+    {
+        currMax = max(currMax, A[i]);
+        //if at any point current max element is greater than the i+2 position element, then global>local
+        if (currMax > A[i + 2])
+            return false;
+    }
+    return true;
+}
 void solve()
 {
 }
