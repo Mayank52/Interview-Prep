@@ -1010,6 +1010,113 @@ bool isIdealPermutation(vector<int> &A)
     }
     return true;
 }
+
+// 560. Subarray Sum Equals K
+int subarraySum(vector<int> &nums, int k)
+{
+    unordered_map<int, int> mp; //prefixSum : count (how many times it has occured till now)
+    int currSum = 0, count = 0;
+
+    for (int i = 0; i < nums.size(); i++)
+    {
+        currSum += nums[i];
+        if (currSum == k)
+            count++;
+        if (mp.find(currSum - k) != mp.end())
+            count += mp[currSum - k];
+        mp[currSum]++;
+    }
+
+    return count;
+}
+
+// 152. Maximum Product Subarray
+int maxProduct(vector<int> &nums)
+{
+    if (nums.size() == 0)
+        return 0;
+
+    int maxpos = nums[0], minneg = nums[0], omax = nums[0]; //omax=overall max
+
+    for (int i = 1; i < nums.size(); i++)
+    {
+        if (nums[i] < 0)
+            swap(minneg, maxpos);
+
+        maxpos = max(nums[i], maxpos * nums[i]);
+        minneg = min(nums[i], minneg * nums[i]);
+
+        omax = max(omax, maxpos);
+    }
+
+    return omax;
+}
+
+// Minimize the heights
+int getMinDiff(int arr[], int n, int k)
+{
+    sort(arr, arr + n);
+    
+    int minDiff = arr[n - 1] - arr[0];
+
+    int minEle = arr[0] + k, maxEle = arr[n - 1] - k;
+    if (maxEle < minEle)
+        swap(maxEle, minEle);
+
+    for (int i = 1; i < n - 1; i++)
+    {
+        int currLargest = arr[i] + k;
+        int currSmallest = arr[i] - k;
+
+        if (currLargest < maxEle || currSmallest > minEle)
+            continue;
+
+        if (maxEle - currSmallest <= currLargest - minEle)
+            minEle = currSmallest;
+        else
+            maxEle = currLargest;
+    }
+
+    return min(minDiff, maxEle - minEle);
+}
+
+// Minimum swaps and K together
+/*
+Using Sliding window
+Find count of all elements which are less than or equals to ‘k’. Let’s say the count is ‘cnt’
+Using two pointer technique for window of length ‘cnt’, each time keep track of how many elements in this range are greater than ‘k’.
+Let’s say the total count is ‘bad’.
+Repeat step 2, for every window of length ‘cnt’ and take minimum of count ‘bad’ among them. This will be the final answer.
+*/
+long minSwaps(vector<int> &arr, int k)
+{
+    int n = arr.size();
+    long count = 0, currCount = 0, minCount;
+
+    for (int i = 0; i < n; i++)
+        if (arr[i] <= k)
+            count++;
+
+    for (int i = 0; i < count; i++)
+    {
+        if (arr[i] > k)
+            currCount++;
+    }
+
+    minCount = currCount;
+    for (int i = count; i < n; i++)
+    {
+        if (arr[i - count] > k)
+            currCount--;
+        if (arr[i] > k)
+            currCount++;
+
+        minCount = min(minCount, currCount);
+    }
+
+    return minCount;
+}
+
 void solve()
 {
 }
