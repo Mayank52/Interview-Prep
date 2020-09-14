@@ -850,27 +850,6 @@ vector<vector<int>> merge(vector<vector<int>> &intervals)
     return res;
 }
 
-// Three way partitioning
-vector<int> threeWayPartition(vector<int> nums, int a, int b)
-{
-    int lt = 0, gt = nums.size() - 1, i = 0;
-    while (i <= gt)
-    {
-        if (nums[i] < a)
-        {
-            swap(nums[lt++], nums[i++]);
-        }
-        else if (nums[i] > b)
-        {
-            swap(nums[gt--], nums[i]);
-        }
-        else
-            i++;
-    }
-
-    return nums;
-}
-
 // 75. Sort Colors (3 Way Partition)
 void sortColors(vector<int> &nums)
 {
@@ -891,6 +870,27 @@ void sortColors(vector<int> &nums)
         else
             i++;
     }
+}
+
+// Three way partitioning
+vector<int> threeWayPartition(vector<int> nums, int a, int b)
+{
+    int lt = 0, gt = nums.size() - 1, i = 0;
+    while (i <= gt)
+    {
+        if (nums[i] < a)
+        {
+            swap(nums[lt++], nums[i++]);
+        }
+        else if (nums[i] > b)
+        {
+            swap(nums[gt--], nums[i]);
+        }
+        else
+            i++;
+    }
+
+    return nums;
 }
 
 // 912. Sort an Array
@@ -1053,30 +1053,39 @@ int maxProduct(vector<int> &nums)
 }
 
 // Minimize the heights
+/*
+Just remember it (not sure about logic)
+*/
 int getMinDiff(int arr[], int n, int k)
 {
+    //sort the heights
     sort(arr, arr + n);
-    
+
+    //find min difference in before changing with +K or -K
     int minDiff = arr[n - 1] - arr[0];
 
     int minEle = arr[0] + k, maxEle = arr[n - 1] - k;
     if (maxEle < minEle)
         swap(maxEle, minEle);
 
+    //for the whole array, find the min and max you can get
     for (int i = 1; i < n - 1; i++)
     {
         int currLargest = arr[i] + k;
         int currSmallest = arr[i] - k;
 
+        //if curr Ele does not become both currMax and currMin after +k and -k then skip it
         if (currLargest < maxEle || currSmallest > minEle)
             continue;
 
+        //choose whether it gives minDiff after +k or -k
         if (maxEle - currSmallest <= currLargest - minEle)
             minEle = currSmallest;
         else
             maxEle = currLargest;
     }
 
+    //return min of the original mindiff and after +K and -K
     return min(minDiff, maxEle - minEle);
 }
 
@@ -1093,16 +1102,19 @@ long minSwaps(vector<int> &arr, int k)
     int n = arr.size();
     long count = 0, currCount = 0, minCount;
 
+    //find total count
     for (int i = 0; i < n; i++)
         if (arr[i] <= k)
             count++;
 
+    //find count for first window
     for (int i = 0; i < count; i++)
     {
         if (arr[i] > k)
             currCount++;
     }
 
+    //after that, just for each window, just check the element that was removed from it (i-count), and added to it(current i)
     minCount = currCount;
     for (int i = count; i < n; i++)
     {
