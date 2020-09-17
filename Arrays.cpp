@@ -417,6 +417,38 @@ int findMin(vector<int> &nums)
     return nums[lo];
 }
 
+// 154. Find Minimum in Rotated Sorted Array II (Duplicates allowed)
+/*
+if arr[mid]==arr[hi], then we have no choice but to do a linear search in whole array,
+as we cannot decide which part pivot lies in.
+So in that case we just reduce the hi by 1
+*/
+int findMin(vector<int> &nums)
+{
+    //Worst case: not rotated array, O(n)
+    int lo = 0, hi = nums.size() - 1;
+    long mid;
+    while (lo < hi)
+    {
+        mid = (lo + hi) / 2;
+        if (nums[mid] < nums[hi])
+            hi = mid;
+        else if (nums[mid] > nums[hi])
+            lo = mid + 1;
+        else
+        {
+            /*if (i-1)th is greater that means (i)th will be the pivot
+            eg- 1 1 1 1 2 1 1
+            here at i=5 , a[i-1]>a[i] and i is the pivot index
+            */
+            if (nums[hi - 1] > nums[hi])
+                return nums[hi];
+            hi--;
+        }
+    }
+    return nums[lo];
+}
+
 // 33. Search in Rotated Sorted Array
 int search_01(vector<int> &nums, int target)
 {
@@ -1128,6 +1160,129 @@ long minSwaps(vector<int> &arr, int k)
 
     return minCount;
 }
+
+// Maximum sum of i*arr[i] among all rotations of a given array
+/*
+We can take rotations in either direction, I am taking anti clockwise(towards left)
+Brute Force- O(n^2)
+Calculate all sums for all rotations of array
+
+Efficient-
+Calculate sum of all arr[i]*i for original array, total Sum of all elements
+after each rotation the change in sum will be due to two things:;
+    the 0th element goes to n-1, arr[i]*0 = 0 becomes arr[i]*(n-1)>0 , so we do rotatedSum+=arr[i]*(n-1)
+    every other element goes from i to i-1, so we subtract the total Sum from rotatedSum except for the arr[i] element 
+so rotatedSum=previousRotatedSum + arr[i]*(n-1) - (totalSum-arr[i])
+*/
+int max_sum(int arr[], int n)
+{
+    long long totalSum = 0, rsum = 0, maxSum = -1e8;
+    //calculate initial totalSum, rotatedSum
+    for (int i = 0; i < n; i++)
+    {
+        totalSum += arr[i];
+        rsum += arr[i] * i;
+    }
+
+    //for each rotation, find the new rotatedSum, by using the formula above
+    for (int i = 0; i < n; i++)
+    {
+        rsum += arr[i] * (n - 1) - (totalSum - arr[i]);
+        maxSum = max(maxSum, rsum);
+    }
+
+    return maxSum;
+}
+
+// 41. First Missing Positive
+/*
+Approach-
+Put every arr[i]>0 at i+1 index
+then iterate through array, and wherever arr[i]!=i+1, i+1 is the missing number
+if none is missing then n+1 is the missng number
+*/
+int firstMissingPositive(vector<int> &nums)
+{
+    int n = nums.size();
+
+    for (int i = 0; i < n; i++)
+    {
+        while (nums[i] > 0 && nums[i] < n + 1 && nums[nums[i] - 1] != nums[i])
+            swap(nums[i], nums[nums[i] - 1]);
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (nums[i] != i + 1)
+            return i + 1;
+    }
+
+    return n + 1;
+}
+
+// 283. Move Zeroes (Move all zeroes to end of array)
+//Approach 1-
+void moveZeroes_01(vector<int> &nums)
+{
+    int idx = 0;
+    for (int i = 0; i < n; i++)
+    {
+        if (nums[i] != 0)
+            nums[idx++] = nums[i];
+    }
+    for (int i = idx; i < nums.size(); i++)
+        nums[i] = 0;
+}
+//Approach 2- (Optimal)
+void moveZeroes_02(vector<int> &nums)
+{
+    /*
+    instead of going through array again and changing to 0,
+    we just do it during first iteration, by swapping the non zero element with last position of non zero element
+    */
+    int idx = 0;
+    for (int i = 0; i < nums.size(); i++)
+    {
+        if (nums[i] != 0)
+            swap(nums[idx++], nums[i]);
+    }
+}
+
+// Largest Sum Subarray of Size at least K
+long long largestSum(vector<int> &arr, int k)
+{
+    int n = arr.size();
+    vector<long long> prefixMaxSum(n);
+
+    //make prefix array of all max contiguos sum till that index
+    long long maxSoFar = arr[0], currMax = 0;
+    for (int i = 0; i < n; i++)
+    {
+        currMax += arr[i];
+        maxSoFar = max(maxSoFar, currMax);
+        if (currMax < 0)
+            currMax = 0;
+        prefixMaxSum[i] = currMax;
+    }
+
+    //for each window (i to j),find window sum, and update overall max with max(window sum, windowSum + maxPrefixSum) for the last index(i-1)
+    long long currSum = 0, maxSum;
+    for (int i = 0; i < k; i++)
+        currSum += arr[i];
+    maxSum = currSum;
+    for (int i = k; i < n; i++)
+    {
+        //currSum = window sum
+        currSum += arr[i] - arr[i - k];
+        //prefixMaxSum[i-k] = max Subarray sum for the last index just before the current window
+        maxSum = max(maxSum, max(currSum, currSum + prefixMaxSum[i - k]));
+    }
+
+    return maxSum;
+}
+
+
+
 
 void solve()
 {
