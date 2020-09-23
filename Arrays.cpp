@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
+#include <stack>
 
 using namespace std;
 
@@ -882,6 +884,34 @@ vector<vector<int>> merge(vector<vector<int>> &intervals)
     return res;
 }
 
+// 57. Insert Interval
+vector<vector<int>> insert(vector<vector<int>> &intervals, vector<int> &newInterval)
+{
+    if (intervals.size() == 0)
+        return {newInterval};
+    vector<vector<int>> res;
+    int idx = 0;
+    //push all intervals less than newInterval into res
+    while (idx < intervals.size() && intervals[idx][1] < newInterval[0])
+        res.push_back(intervals[idx++]);
+
+    //find and push the merged Interval into res
+    int mergedStart = newInterval[0], mergedEnd = newInterval[1];
+    while (idx < intervals.size() && newInterval[1] >= intervals[idx][0])
+    {
+        mergedStart = min(mergedStart, intervals[idx][0]);
+        mergedEnd = max(mergedEnd, intervals[idx][1]);
+        idx++;
+    }
+    res.push_back({mergedStart, mergedEnd});
+
+    //push the remaining intervals into res
+    while (idx < intervals.size())
+        res.push_back(intervals[idx++]);
+
+    return res;
+}
+
 // 75. Sort Colors (3 Way Partition)
 void sortColors(vector<int> &nums)
 {
@@ -1225,7 +1255,7 @@ int firstMissingPositive(vector<int> &nums)
 void moveZeroes_01(vector<int> &nums)
 {
     int idx = 0;
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < nums.size(); i++)
     {
         if (nums[i] != 0)
             nums[idx++] = nums[i];
@@ -1281,11 +1311,515 @@ long long largestSum(vector<int> &arr, int k)
     return maxSum;
 }
 
+// 179. Largest Number (Arrange given numbers to form the biggest number)
+static int myCompare(string x, string y)
+{
+    /*
+    For example, let X and Y be 542 and 60. 
+    To compare X and Y, we compare 54260 and 60542. 
+    Since 60542 is greater than 54260, we put Y first.
+    */
+    string xy = x + y;
+    string yx = y + x;
+    return xy.compare(yx) > 0 ? 1 : 0;
+}
+string largestNumber(vector<int> &nums)
+{
+    //convert all numbers to string
+    vector<string> sortedNums(nums.size());
+    for (int i = 0; i < nums.size(); i++)
+        sortedNums[i] = to_string(nums[i]);
+
+    //sort the string array using custom comparator
+    sort(sortedNums.begin(), sortedNums.end(), myCompare);
+
+    //edge case: all are 0 in array, so greatest in sorted i.e arr[0]='0'
+    if (sortedNums[0] == "0")
+        return "0";
+
+    //form the greatest number
+    string maxNum = "";
+    for (int i = 0; i < sortedNums.size(); i++)
+        maxNum += sortedNums[i];
+
+    return maxNum;
+}
+
+// Form minimum number from given sequence (G4G, only 1-9 allowed)
+/*Brute Force- Backtracking(TLE)
+At every step we choice between 1-9, depending on already visited numbers
+1.Check current pattern
+2.if 'D' : currNum=minimum available
+else: currNum=min available whuich is greater than last Available number
+3.if the required number is invalid i.e. <1 || >9, backtrack
+*/
+int ans;
+bool minNum(string &pattern, vector<bool> &vis, int idx, int currNum)
+{
+    if (idx == pattern.size())
+    {
+        ans = currNum;
+        return true;
+    }
+    int ln = currNum % 10;
+
+    if (pattern[idx] == 'D')
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            if (!vis[i] && i + 1 < ln)
+            {
+                int num = i + 1;
+                vis[num - 1] = true;
+                if (minNum(pattern, vis, idx + 1, currNum * 10 + num))
+                    return true;
+                vis[num - 1] = false;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            if (!vis[i] && i + 1 > ln)
+            {
+                int num = i + 1;
+                vis[num - 1] = true;
+                if (minNum(pattern, vis, idx + 1, currNum * 10 + num))
+                    return true;
+                vis[num - 1] = false;
+            }
+        }
+    }
+
+    return false;
+}
+int minNum(string &pattern)
+{
+    vector<bool> vis(9, false);
+    for (int i = 1; i <= 9; i++)
+    {
+        vis[i - 1] = true;
+        if (minNum(pattern, vis, 0, i))
+            return ans;
+        vis[i - 1] = false;
+    }
+
+    return -1;
+}
+
+//884. Find Permutation(Lintcode) (Form minimum number from given sequence)
+/*Approach 1(Use Stack)- Time:O(n), Space: O(n)
+If it's all just I, then the answer is the numbers in ascending order.
+And if there are streaks of D, then just reverse the number streak under each
+*/
+vector<int> findPermutation(string &s)
+{
+    stack<int> st;
+    vector<int> res;
+    st.push(-1);
+    int lastMin = 1;
+
+    //base case
+    if (s[0] == 'I')
+    {
+        res.push_back(1);
+        lastMin++;
+    }
+    else
+    {
+        st.push(lastMin++);
+    }
+
+    for (int i = 0; i < s.size(); i++)
+    {
+        //if D, push into stack the lastMin
+        if (s[i] == 'D')
+        {
+            st.push(lastMin++);
+        }
+
+        //if I, pop everything from stack and push into res, then push lastMin into stack
+        else
+        {
+            while (st.top() != -1)
+            {
+                res.push_back(st.top());
+                st.pop();
+            }
+            st.push(lastMin++);
+        }
+    }
+
+    while (st.top() != -1)
+    {
+        res.push_back(st.top());
+        st.pop();
+    }
+
+    return res;
+}
+//Approach 2: Time: O(n), Space: O(1), same as previous, just emulate stack using 2 pointers
+vector<int> findPermutation(string &s)
+{
+    vector<int> res;
+    int lastMin = 1, lastIdx = -1; //lastIdx= index of last 'I'
+
+    //base case
+    if (s[0] == 'I')
+    {
+        lastIdx = 0;
+        res.push_back(lastMin);
+    }
+    else
+        lastIdx = -1;
+
+    for (int i = 0; i < s.size(); i++)
+    {
+        //if D, push into stack the lastMin
+        if (s[i] == 'D')
+            lastMin++;
+
+        //if I, pop everything from stack and push into res, then push lastMin into stack
+        else
+        {
+            int num = lastMin;
+            for (int j = lastIdx; j < i; j++)
+                res.push_back(num--);
+            lastMin++;
+            lastIdx = i;
+        }
+    }
+
+    //push whatever remains in stack into res
+    int num = lastMin;
+    for (int j = lastIdx; j < s.size(); j++)
+        res.push_back(num--);
+
+    return res;
+}
+//Approach 2- shorter code(removed the if(s[i]=='D) condition as we didnt do anything in it, and other things)
+vector<int> findPermutation(string &s)
+{
+    vector<int> res;
+    int lastMin = 1, lastIdx = -1; //lastIdx= index of last 'I'
+
+    //base case
+    if (s[0] == 'I')
+    {
+        lastIdx = 0;
+        res.push_back(lastMin);
+    }
+    else
+        lastIdx = -1;
+
+    for (int i = 0; i < s.size(); i++)
+    {
+        if (s[i] == 'I')
+        {
+            int num = lastMin;
+            for (int j = lastIdx; j < i; j++)
+                res.push_back(num--);
+            lastIdx = i;
+        }
+        lastMin++;
+    }
+
+    for (int j = lastIdx; j < s.size(); j++)
+        res.push_back(lastMin--);
+
+    return res;
+}
+
+// Find the smallest positive integer value that cannot be represented as sum of any subset of a given array
+/*
+1) We decide that ‘res’ is the final result: 
+If arr[i] is greater than ‘res’,
+then we found the gap which is ‘res’ because the elements after arr[i] are also going to be greater than ‘res’.
+2) The value of ‘res’ is incremented after considering arr[i]: 
+The value of ‘res’ is incremented by arr[i] (why? If elements from 0 to (i-1) can represent 1 to ‘res-1’, 
+then elements from 0 to i can represent from 1 to ‘res + arr[i] – 1’ be adding ‘arr[i]’ to all subsets that represent 1 to ‘res’)
+*/
+long long findSmallest(long long arr[], int n)
+{
+    long long res = 1;
+    for (int i = 0; i < n; i++)
+    {
+        if (arr[i] <= res)
+            res += arr[i];
+        else
+            break;
+    }
+    return res;
+}
+
+// Generate all possible sorted arrays from alternate elements of two given sorted arrays
+void possibleArrays(vector<int> &A, vector<int> &B, int i, int j, int flag, vector<int> &smallAns, vector<vector<int>> &ans)
+{
+    //Add element from A
+    if (flag == 0)
+    {
+        if (i >= A.size())
+            return;
+        //find index of next element in sorted order
+        while (i < A.size() && A[i] < smallAns[smallAns.size() - 1])
+            i++;
+        //call recursion for every element after that
+        for (int k = i; k < A.size(); k++)
+        {
+            smallAns.push_back(A[k]);
+            possibleArrays(A, B, k + 1, j, 1, smallAns, ans);
+            smallAns.pop_back();
+        }
+    }
+
+    //Add element from B
+    else
+    {
+        //same as A, but for B it is added to the ans array
+        if (j >= B.size())
+            return;
+        while (j < B.size() && B[j] < smallAns[smallAns.size() - 1])
+            j++;
+        for (int k = j; k < B.size(); k++)
+        {
+            smallAns.push_back(B[k]);
+            ans.push_back(smallAns);
+            possibleArrays(A, B, i, k + 1, 0, smallAns, ans);
+            smallAns.pop_back();
+        }
+    }
+}
+vector<vector<int>> possibleArrays(vector<int> &A, vector<int> &B)
+{
+    vector<int> smallAns;
+    vector<vector<int>> ans;
+
+    for (int i = 0; i < A.size(); i++)
+    {
+        smallAns.push_back(A[i]);
+        possibleArrays(A, B, i + 1, 0, 1, smallAns, ans);
+        smallAns.pop_back();
+    }
+
+    return ans;
+}
+
+// 31. Next Permutation
+void nextPermutation(vector<int> &nums)
+{
+    if (nums.size() <= 1)
+        return;
+    int i = nums.size() - 1, minNum = 1e8, minIdx = i;
+    //find the first number where arr[i]>arr[i-1]
+    while (i > 0 && nums[i] <= nums[i - 1])
+        i--;
+
+    //if array is completlely descending
+    if (i == 0)
+    {
+        sort(nums.begin(), nums.end());
+        return;
+    }
+
+    //find the element after i, that is just greater than arr[i]
+    i--;
+    for (int k = i; k < nums.size(); k++)
+    {
+        if (nums[k] > nums[i] && nums[k] < minNum)
+        {
+            minNum = nums[k];
+            minIdx = k;
+        }
+    }
+
+    //swap those two elements, and sort the sort from i+1 to n
+    swap(nums[i], nums[minIdx]);
+    sort(nums.begin() + i + 1, nums.end());
+}
+
+// 795. Number of Subarrays with Bounded Maximum
+/*Approach- T: O(n), S: O(n)
+Suppose dp[i] denotes the max number of valid sub-array ending with A[i]. We use following example to illustrate the idea:
+A = [2, 1, 4, 2, 3], L = 2, R = 3
+
+if A[i] < L
+For example, i = 1. We can only append A[i] to a valid sub-array ending with A[i-1] to create new sub-array. So we have dp[i] = dp[i-1] (for i > 0)
+
+if A[i] > R:
+For example, i = 2. No valid sub-array ending with A[i] exist. So we have dp[i] = 0.
+We also record the position of the invalid number 4 here as prev.
+
+if L <= A[i] <= R
+For example, i = 4. In this case any sub-array starts after the previous invalid number to A[i] (A[prev+1..i], A[prev+2..i]) is a new valid sub-array. So dp[i] += i - prev
+
+Finally the sum of the dp array is the solution. Meanwhile, notice dp[i] only relies on dp[i-1] (and also prev), we can reduce the space complexity to O(1)
+*/
+int numSubarrayBoundedMax(vector<int> &A, int L, int R)
+{
+    int prev = 0;
+    vector<int> dp(A.size() + 1, 0);
+    for (int i = 1; i <= A.size(); i++)
+    {
+        if (A[i - 1] < L)
+        {
+            dp[i] = dp[i - 1];
+        }
+        else if (A[i - 1] >= L && A[i - 1] <= R)
+        {
+            dp[i] = i - prev;
+        }
+        else
+        {
+            prev = i;
+            dp[i] = 0;
+        }
+    }
+
+    int count = 0;
+    for (int i = 0; i < dp.size(); i++)
+        count += dp[i];
+
+    return count;
+}
+//Approach- same as above, O(1) space
+int numSubarrayBoundedMax(vector<int> &A, int L, int R)
+{
+    int prev = 0, prevCount = 0, count = 0;
+    for (int i = 1; i <= A.size(); i++)
+    {
+        if (A[i - 1] < L)
+            count += prevCount;
+        else if (A[i - 1] >= L && A[i - 1] <= R)
+        {
+            prevCount = i - prev;
+            count += prevCount;
+        }
+        else
+        {
+            prev = i;
+            prevCount = 0;
+        }
+    }
+
+    return count;
+}
+
+// Number of Sub-arrays of Size K
+/*Approach-
+simple recursion using subsequence method
+We can avoid duplicate subarrays by using a set
+OR
+We can avoid duplicates by adding following two additional things to above code.
+1) Add code to sort the array before calling combinationUtil() in printCombination()
+2) Add following lines in the recursion
+    // Since the elements are sorted, all occurrences of an element
+    // must be together
+        while (arr[i] == arr[i+1])
+             i++; 
+*/
+int K;
+unordered_set<vector<int>> res;
+void numOfSubarrays(vector<int> &arr, int k, int idx, vector<int> &smallAns)
+{
+    if (k == 0)
+    {
+        res.insert(smallAns);
+    }
+    if (idx == arr.size())
+        return;
+    smallAns.push_back(arr[idx]);
+    numOfSubarrays(arr, k - 1, idx + 1, smallAns);
+    smallAns.pop_back();
+    numOfSubarrays(arr, k, idx + 1, smallAns);
+}
+int numOfSubarrays(vector<int> &arr, int k, int threshold)
+{
+    K = k;
+    vector<int> smallAns;
+    numOfSubarrays(arr, k, 0, smallAns);
+    return res.size();
+}
+
+// 689. Maximum Sum of 3 Non-Overlapping Subarrays
+/*
+Use Subarray sum array, prefix array, suffix array to get the three non overlapping windows
+In prefix an dsuffix we store the index so that we can get lexicographically smallest
+*/
+vector<int> maxSumOfThreeSubarrays(vector<int> &nums, int k)
+{
+    vector<int> subArraySum(nums.size(), 0);
+    int currSum = 0;
+
+    //make the subarray for all window sums
+    for (int i = 0; i < k; i++)
+        currSum += nums[i];
+    subArraySum[k - 1] = currSum;
+    for (int i = k; i < nums.size(); i++)
+    {
+        currSum += nums[i] - nums[i - k];
+        subArraySum[i] = currSum;
+    }
+
+    //make a prefix array for index of max window sum from 0 to till me
+    vector<int> maxLeft(nums.size());
+    int maxSum = subArraySum[0], maxIdx = 0;
+    for (int i = 0; i < nums.size(); i++)
+    {
+        if (subArraySum[i] > maxSum)
+        {
+            maxSum = subArraySum[i];
+            maxIdx = i;
+        }
+        maxLeft[i] = maxIdx;
+    }
+
+    //make suffix array for index of max window sum from me to n-1
+    vector<int> maxRight(nums.size());
+    maxSum = subArraySum[subArraySum.size() - 1];
+    maxIdx = subArraySum.size() - 1;
+    for (int i = nums.size() - 1; i >= 0; i--)
+    {
+        //we use >= as we need lexicograhically smallest, we need index of leftmost max sum on my right
+        if (subArraySum[i] >= maxSum)
+        {
+            maxSum = subArraySum[i];
+            maxIdx = i;
+        }
+        maxRight[i] = maxIdx;
+    }
+
+    //using the three arrays find the lexicographically smallest max sum
+    vector<int> ans(3, -1);
+    int maxTotalSum = -1e8;
+    for (int i = k; i < nums.size() - k; i++)
+    {
+        //get the index of window sum of left, middle, right
+        int l = maxLeft[i - k], m = i, r = maxRight[i + k];
+        int currTotalSum = subArraySum[l] + subArraySum[m] + subArraySum[r];
+
+        if (currTotalSum > maxTotalSum)
+        {
+            /*use (-k+1) to get the starting index of the window,
+            as we are storing the last index of each window in all 3 arrays*/
+            maxTotalSum = currTotalSum;
+            ans[0] = l - k + 1;
+            ans[1] = m - k + 1;
+            ans[2] = r - k + 1;
+        }
+    }
+
+    return ans;
+}
 
 
 
 void solve()
 {
+    vector<int> A{1, 2, 1, 2, 6, 7, 5, 1};
+    // vector<int> B{1, 5, 20, 30};
+    // possibleArrays(A, B);
+    maxSumOfThreeSubarrays(A, 2);
 }
 int main()
 {
