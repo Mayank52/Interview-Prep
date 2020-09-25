@@ -1912,6 +1912,48 @@ void reorder(vector<int> &arr, vector<int> &index)
     }
 }
 
+// Rearrange an array in maximum minimum form
+/*
+All evcen index have max element, and odd have min element
+We encode each elemenrt with arr[i] += (arr[max_index] % max_element * max_element) for even index
+and encode each elemenrt with arr[i] += (arr[min_index] % max_element * max_element) for odd index
+How does expression “arr[i] += arr[max_index] % max_element * max_element” work ?
+The purpose of this expression is to store two elements at index arr[i].
+arr[max_index] is stored as multiplier and “arr[i]” is stored as remainder.
+For example in {1 2 3 4 5 6 7 8 9}, max_element is 10 and we store 91 at index 0.
+With 91, we can get original element as 91%10 and new element as 91/10.
+*/
+void rearrange(vector<long> &arr)
+{
+    int n = arr.size();
+    long maxIdx = n - 1, minIdx = 0, maxEle = arr[n - 1] + 1;
+    for (int i = 0; i < n; i++)
+    {
+        //encode for even index with maxIdx
+        //arr[maxIdx] % maxEle gives the original element at maxIdx,
+        //then we encode it with arr[i] += originalElement * maxEle
+        if (i % 2 == 0)
+        {
+            arr[i] += (arr[maxIdx] % maxEle) * maxEle;
+            maxIdx--;
+        }
+        //encode for even index with minIdx
+        else
+        {
+            arr[i] += (arr[minIdx] % maxEle) * maxEle;
+            minIdx++;
+        }
+    }
+
+    //Recover the array
+    for (int i = 0; i < n; i++)
+        arr[i] /= maxEle;
+
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
+    cout << endl;
+}
+
 void solve()
 {
     vector<int> A{1, 2, 1, 2, 6, 7, 5, 1};
