@@ -1812,7 +1812,105 @@ vector<int> maxSumOfThreeSubarrays(vector<int> &nums, int k)
     return ans;
 }
 
+// 974. Subarray Sums Divisible by K
+/*
+count the freq of all remainders you can get
+then for each remainder, total subarrays that can be formed= count*(count-1)/2
+*/
+int subarraysDivByK(vector<int> &A, int K)
+{
+    vector<int> count(K); //array of count of remainders
+    int res = 0;
+    int sum = 0;
+    //get all the counts
+    for (int i = 0; i < A.size(); i++)
+    {
+        sum += A[i];
+        //if the current sum%k==0 then increase ans by 1
+        if (sum % K == 0)
+            res++;
+        //[(sum % K + K) % K] gives the proper index, we use (sum % K + K) % K because the sum can be negative,
+        // so sum % K will give negative index
+        count[(sum % K + K) % K]++;
+    }
 
+    for (int i = 0; i < count.size(); i++)
+        res += count[i] * (count[i] - 1) / 2;
+
+    return res;
+}
+
+// Find minimum number of merge operations to make an array palindrome
+int minMerge(vector<int> &arr)
+{
+    int n = arr.size();
+    int count = 0;
+    int i = 0, j = n - 1;
+    while (i < j)
+    {
+        if (arr[i] < arr[j])
+        {
+            arr[i + 1] = arr[i + 1] + arr[i];
+            count++;
+            i++;
+        }
+        else if (arr[i] > arr[j])
+        {
+            arr[j - 1] = arr[j - 1] + arr[j];
+            j--;
+            count++;
+        }
+        else
+        {
+            i++;
+            j--;
+        }
+    }
+
+    return count;
+}
+
+// Reorder an array according to given indexes
+/*
+Approach 1- O(n) space
+just take an auxilliary array, and put everything at its right place in it
+
+Approach 2- Sorting - Time: O(nlogn), Space: O(1)
+When all are in their correct positions then the index array will be sorted.
+So, we can just sort the index array, and sort the corresponding elements of the element array along with it
+So for eg-
+Input:  arr[]   = [50, 40, 70, 60, 90]
+        index[] = [3,  0,  4,  1,  2]
+Output: arr[]   = [40, 60, 90, 50, 70]
+        index[] = [0,  1,  2,  3,   4] 
+
+When 0 in index array comes to 0th index, with it 40 will too.
+So after sorting they all will be in correct positions
+
+Approach 3- Time: O(n) , Space: O(1)
+for every index{
+    while(the value at this index is not supposed to be at this index i.e index[i]!=i)
+        we swap the value at this index with the value at its correct position
+
+for eg-
+at index 0-> 50,3, so we swap with values at index 3 i.e 60,1.
+Now 60,1 should not be at 0th index, so swap it with 1th index values i.e. 40,0
+Now 40,0 are at correct index and so we move on. 
+}
+
+*/
+void reorder(vector<int> &arr, vector<int> &index)
+{
+    //Approach 3-
+    for (int i = 0; i < arr.size(); i++)
+    {
+        while (index[i] != i)
+        {
+            swap(arr[i], arr[index[i]]);
+            swap(index[i], index[index[i]]);
+        }
+    }
+}
 
 void solve()
 {
