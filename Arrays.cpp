@@ -1956,10 +1956,6 @@ void rearrange(vector<long> &arr)
 
 void solve()
 {
-    vector<int> A{1, 2, 1, 2, 6, 7, 5, 1};
-    // vector<int> B{1, 5, 20, 30};
-    // possibleArrays(A, B);
-    maxSumOfThreeSubarrays(A, 2);
 }
 int main()
 {
