@@ -5,6 +5,41 @@
 
 using namespace std;
 
+// 268. Missing Number
+/*Approach 1-
+We use xor, and we xor all elements of array as well the indexes.
+
+Because we know that nums contains n numbers and that it is missing exactly one number on the range [0..n],
+Therefore, if we initialize an integer to n and XOR it with every index and value,
+we will be left with the missing number.
+Consider the following example (the values have been sorted for intuitive convenience, but need not be):
+
+Index	0	1	2	3
+Value	0	1	3	4
+
+=4∧(0∧0)∧(1∧1)∧(2∧3)∧(3∧4)
+=(4∧4)∧(0∧0)∧(1∧1)∧(3∧3)∧2
+=0∧0∧0∧0∧2
+=2
+
+Approach 2-
+find the expected total sum = n(n-1)/2, as the array has all values in range 0...n
+the find actual sum using for loop
+return expectedSum - actualSum
+*/
+int missingNumber(vector<int> &nums)
+{
+    int n = nums.size();
+    int xorVal = n;
+    for (int i = 0; i < n; i++)
+    {
+        xorVal ^= i;
+        xorVal ^= nums[i];
+    }
+
+    return xorVal;
+}
+
 // 136. Single Number
 int singleNumber(vector<int> &nums)
 {
