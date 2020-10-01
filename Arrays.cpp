@@ -1954,6 +1954,68 @@ void rearrange(vector<long> &arr)
     cout << endl;
 }
 
+// 442. Find All Duplicates in an Array
+/*
+For every number make the element at arr[arr[i]] -ve
+if it is already -ve, then it is repeating
+*/
+vector<int> findDuplicates(vector<int> &nums)
+{
+    int n = nums.size();
+    vector<int> res;
+
+    //we can mark nums[nums[i]-1] as -ve, so we wont have to check for n seperately
+    // int flag = 0; //to check if the max element i.e. n has been seen already
+    for (int i = 0; i < n; i++)
+    {
+        // if (abs(nums[i]) == n)
+        // {
+        //     if (flag == 1)
+        //         res.push_back(n);
+        //     else
+        //         flag = 1;
+        // }
+        if (nums[abs(nums[i]) - 1] < 0)
+            res.push_back(abs(nums[i]));
+        else
+            nums[abs(nums[i]) - 1] *= -1;
+    }
+
+    return res;
+}
+
+// Find duplicates in O(n) time and O(1) extra space (same element can ve present more than 2 times)
+/*
+There is a problem in the above approach.
+It prints the repeated number more than once. For example: {1, 6, 3, 1, 3, 6, 6} it will give output as : 1 3 6 6.
+In below set, another approach is discussed that prints repeating elements only once.
+Approach: The basic idea is to use a HashMap to solve the problem. But there is a catch, the numbers in the array are from 0 to n-1,
+and the input array has length n. So, the input array can be used as a HashMap. While Traversing the array,
+if an element ‘a’ is encountered then increase the value of a%n‘th element by n. The frequency can be retrieved by dividing the a % n’th element by n.
+Algorithm:
+Traverse the given array from start to end.
+For every element in the array increment the arr[i]%n‘th element by n.
+Now traverse the array again and print all those indexes i for which arr[i]/n is greater than 1. Which guarantees that the number n has been added to that index
+This approach works because all elements are in the range from 0 to n-1 and arr[i] would be greater than n only if a value “i” has appeared more than once.
+*/
+vector<int> duplicates(int arr[], int n)
+{
+    vector<int> res;
+    for (int i = 0; i < n; i++)
+        arr[arr[i] % n] += n;
+
+    for (int i = 0; i < n; i++)
+    {
+        //if it occurs once, then it will only be arr[i]+=n once, so if it is >n*2 then there are duplicates
+        if (arr[i] >= n * 2)
+            res.push_back(i);
+    }
+
+    if (res.size() == 0)
+        return {-1};
+    return res;
+}
+
 void solve()
 {
 }

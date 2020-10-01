@@ -601,6 +601,110 @@ int minMoves2(vector<int> &nums)
     return count;
 }
 
+// Check if reversing a sub array make the array sorted (no submit option)
+/*
+for the array to be sorted every arr[i]>arr[i-1]
+so we keep going until array is increasing
+when it starts decreasing, we keep going,
+and then for the last element of the decreasing subarray, we check if it is > last element of increasing subarray
+and the first element of decreasing subarray is < first of next increasing subarray
+and everything after that is also sorted
+
+For eg- {1,2,3,4,20,9,16,17} 
+till 4 it is first part
+then 20,9 is second part
+but 20>16 so false
+
+Similarly like, {1,2,3,4,10,3,16,17}
+now after rotation 3<4 so false
+*/
+bool checkSubarray(vector<int> &arr)
+{
+    int n = arr.size();
+
+    int i = 0;
+    //check for the first increasing subarray
+    while (i < n - 1)
+    {
+        if (arr[i] > arr[i + 1])
+            break;
+        i++;
+    }
+
+    int lastSortedEle = arr[i - 1]; //last element in the first part
+    int firstUnsorted = arr[i];
+
+    //check for decreasing subarray, which can be rotated
+    while (i < n - 1)
+    {
+        if (arr[i] < arr[i + 1])
+            break;
+        i++;
+    }
+
+    //check if the last element of second part is greater than the last of first part
+    //or first element of second is > first element of third part
+    //i.e. after rotation, it will be sorted
+    if (arr[i] < lastSortedEle || (i < n && firstUnsorted > arr[i + 1]))
+        return false;
+
+    //check for the increasing subarray after the rotated subarray
+    while (i < n - 1)
+    {
+        if (arr[i] > arr[i + 1])
+            break;
+        i++;
+    }
+
+    return i == n;
+}
+
+// A Product Array Puzzle
+/*
+Given an array arr[] of n integers, construct a Product Array prod[] (of same size) 
+such that prod[i] is equal to the product of all the elements of arr[] except arr[i].
+
+Approach 1-
+Get the total product of array. For each element res[i]=totalProduct/arr[i]
+
+Without using Division-
+Approach 1 - Prefix and suffix array
+Make a prefix and suffix array
+then for each res[i]=prefixProduct[i-1] * suffixProduct[i+1]
+
+Approach 2 - Instead of taking O(2n) space for prefix and suffix, use a temp variable to store the prefix and suffix product
+Do same as prefix and suffix, But build the prefix and suffix array in the res array itself,
+just keep a temp variable that stores the prefix product for that index
+then use the temp variable to keep the suffix product
+*/
+void productArray(vector<int> &arr)
+{
+    int n = arr.size();
+    long long temp = 1;
+    vector<long long> res(n);
+
+    //get the prefix product of 0...i-1
+    for (int i = 0; i < n; i++)
+    {
+        res[i] = temp;
+        temp *= arr[i];
+    }
+
+    //multiply the prefix products with suffix product of i+1....n-1
+    temp = 1;
+    for (int i = n - 1; i >= 0; i--)
+    {
+        res[i] *= temp;
+        temp *= arr[i];
+    }
+
+    //display the result
+    for (int i = 0; i < n; i++)
+        cout << res[i] << " ";
+    cout << endl;
+}
+
+
 
 void solve()
 {
