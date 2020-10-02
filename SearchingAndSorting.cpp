@@ -704,7 +704,145 @@ void productArray(vector<int> &arr)
     cout << endl;
 }
 
+// 4. Median of Two Sorted Arrays
+int getMax(vector<int> &nums, int idx) //find max of left region of partition
+{
+    if (idx == 0)
+        return -1e8;
+    return nums[idx - 1];
+}
+int getMin(vector<int> &nums, int idx) //find min of right region of partition
+{
+    if (idx == nums.size())
+        return 1e8;
+    return nums[idx];
+}
+double findMedianSortedArrays(vector<int> &nums1, vector<int> &nums2)
+{
+    if (nums1.size() > nums2.size())
+        return findMedianSortedArrays(nums2, nums1);
 
+    int lo = 0;
+    int hi = nums1.size();
+    int totalLength = nums1.size() + nums2.size();
+
+    while (lo <= hi)
+    {
+        //get the partition for both arrays
+        int partX = (lo + hi) / 2;
+        int partY = (totalLength + 1) / 2 - partX; //+1 to account for odd and even, as in odd (7+1/2)=4 and in even (8+1)/2=4 too
+
+        //get the leftMax and rightMin for both
+        int leftX = getMax(nums1, partX);
+        int leftY = getMax(nums2, partY);
+
+        int rightX = getMin(nums1, partX);
+        int rightY = getMin(nums2, partY);
+
+        //if partition is correct
+        if (leftX <= rightY && leftY <= rightX)
+        {
+            //avg in case of even length
+            if (totalLength % 2 == 0)
+                return (max(leftX, leftY) + min(rightX, rightY)) / 2.0;
+            //leftMax in case of odd length
+            return max(leftX, leftY);
+        }
+        //lies in left region
+        else if (leftX > rightY)
+            hi = partX - 1;
+        //lies in right region
+        else
+            lo = partX + 1;
+    }
+
+    return -1;
+}
+
+// Merge Without Extra Space
+/*
+Approach 1 - Merge using extra space O(n+m) time, O(n+m) space
+
+Approach 2 - Insertion sort - O(n*m) time O(1) space
+iterate through first array, if arr1[i]>arr2[j] then swap them
+and then put the new element in the correct position in arr2.
+For eg-
+1 7 9 11
+3 4 6 8
+
+so 1<3 move on
+7>3 -> swap(7,3) -> arr2= 7 4 6 8, now put 7 in its correct position using linear traversal
+for that you will have to move all other elements <7 to left, so it O(m) time for this step
+
+Approach 3 - Shell Sort kind of algo to merge in O(nlogn), O(1) time,space
+Find the gap
+swap elements according to gap in 1st array,
+swap elements according to gap in 1st and 2nd when gap includes element from both,
+swap in second array
+update gap
+*/
+void merge(int arr1[], int arr2[], int n, int m)
+{
+    int gap = (n + m + 1) / 2;
+}
+
+// Sort an array according to count of set bits
+/*
+Approach 1- O(nlogn),O(n)
+Make another array of setbit count of each element, then sort it normally according to setbit count
+
+Approach 2- Count Sort O(n), O(1)
+As at max int can have 32 set bits so take a vector<vector<int>> of 32 size
+at each index we have all element with setbit count=i
+then just traverse in reverse and add them to result, to get the decreasing order of elements
+*/
+//Approach 2-
+int setBitCount(int n)
+{
+    int count = 0;
+
+    while (n != 0)
+    {
+        int rsbmask = (n & -n);
+        n -= rsbmask;
+        count++;
+    }
+
+    return count;
+}
+void setBitSort(vector<int> &arr)
+{
+    vector<vector<int>> setBits(32);
+    for (int i = 0; i < arr.size(); i++)
+    {
+        int count = setBitCount(arr[i]);
+        setBits[count].push_back(arr[i]);
+    }
+
+    for (int i = 31; i >= 0; i--)
+    {
+        if (setBits[i].size() > 0)
+        {
+            for (int ele : setBits[i])
+                cout << ele << " ";
+        }
+    }
+
+    cout << endl;
+}
+
+// Permute two arrays such that sum of every pair is greater or equal to K
+int findAns(vector<long> &nums1, vector<long> &nums2, long k)
+{
+    sort(nums1.begin(), nums1.end());
+    sort(nums2.begin(), nums2.end(), greater<long>());
+
+    for (int i = 0; i < nums1.size(); i++)
+        if (nums1[i] + nums2[i] < k)
+            return 0;
+
+    return 1;
+}
 
 void solve()
 {
