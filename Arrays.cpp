@@ -205,7 +205,7 @@ int pivotIndex(vector<int> &a)
 
 // Convert array into Zig-Zag fashion
 /*
-keep a flag to check required condition nextEle>currEle or nextEle<currEle
+keep a flag to check required condition nextEle > currEle or nextEle < currEle
 if condition is false then swap the two elements
 */
 void zigzag(vector<int> &a)
@@ -270,6 +270,11 @@ int minDiff(vector<int> &packets, int children)
     sort(packets.begin(), packets.end());
 
     int minDiff = 1e8;
+
+    // Find the subarray of size m such that
+    // difference between last (maximum in case
+    // of sorted) and first (minimum in case of
+    // sorted) elements of subarray is minimum.
     for (int i = 0; i + children - 1 < packets.size(); i++)
     {
         minDiff = min(minDiff, packets[i + children - 1] - packets[i]);
@@ -296,16 +301,19 @@ int getStations(vector<int> &arrival, vector<int> &departure)
     while (i < n && j < n)
     {
         //check for <= as arrival and departure times can be same as well and we need a seperate stations in this case
+        //train arrives -> currStations++
         if (arrival[i] <= departure[j])
         {
             i++;
             currStations++;
         }
+        //train departs -> currStations--
         else
         {
             j++;
             currStations--;
         }
+        //update the max stations at a time
         minStations = max(currStations, minStations);
     }
 
@@ -350,21 +358,29 @@ vector<vector<int>> kSmallestPairs(vector<int> &nums1, vector<int> &nums2, int k
 
     priority_queue<vector<int>, vector<vector<int>>, compareSum> pq; // {nums1[i], nums2[j], j}
 
+    //form pairs with the first element of num2 with all elements in num1
+    //so we add all (0,0), (1,0), (2,0)........(n-1,0) into PQ
     for (int i = 0; i < nums1.size() && i < k; i++)
     {
         pq.push({nums1[i], nums2[0], 0});
     }
 
+    //for each pair removed from PQ push the pair with next largest sum into it
+    //we have a choice to add either (i,j+1) or (i+1,j), but we only add (i,j+1)
+    //as the (i+1,j) we already be in the PQ or not qualified. 
+    //PQ is of size K
     while (k-- > 0 && pq.size() != 0)
     {
         vector<int> pr = pq.top();
         pq.pop();
 
+        //add the top of PQ into the answer
         ans.push_back({pr[0], pr[1]});
 
         if (pr[2] == nums2.size() - 1)
             continue;
 
+        //next largest sum will be given by the next element of nums2 from the element removed from PQ
         pq.push({pr[0], nums2[pr[2] + 1], pr[2] + 1});
     }
 
@@ -1237,6 +1253,8 @@ int firstMissingPositive(vector<int> &nums)
 
     for (int i = 0; i < n; i++)
     {
+        //if the number is in range of array, and not already at the right position
+        //swap it with the number at that position
         while (nums[i] > 0 && nums[i] < n + 1 && nums[nums[i] - 1] != nums[i])
             swap(nums[i], nums[nums[i] - 1]);
     }
@@ -1295,7 +1313,8 @@ long long largestSum(vector<int> &arr, int k)
         prefixMaxSum[i] = currMax;
     }
 
-    //for each window (i to j),find window sum, and update overall max with max(window sum, windowSum + maxPrefixSum) for the last index(i-1)
+    //for each window (i to j),find window sum, and update overall max with max(window sum, windowSum + maxPrefixSum)
+    // for the last index(i-1)
     long long currSum = 0, maxSum;
     for (int i = 0; i < k; i++)
         currSum += arr[i];
@@ -1412,6 +1431,14 @@ int minNum(string &pattern)
 /*Approach 1(Use Stack)- Time:O(n), Space: O(n)
 If it's all just I, then the answer is the numbers in ascending order.
 And if there are streaks of D, then just reverse the number streak under each
+
+Eg-
+ I I I I I I I I
+1 2 3 4 5 6 7 8 9 
+
+ I D D I D D D I
+1 4 3 2 8 7 6 5 9
+
 */
 vector<int> findPermutation(string &s)
 {
@@ -1533,6 +1560,9 @@ vector<int> findPermutation(string &s)
 
 // Find the smallest positive integer value that cannot be represented as sum of any subset of a given array
 /*
+Q)Given a sorted array (sorted in non-decreasing order) of positive numbers,
+find the smallest positive integer value that cannot be represented as sum of elements of any subset of given set.
+
 1) We decide that ‘res’ is the final result: 
 If arr[i] is greater than ‘res’,
 then we found the gap which is ‘res’ because the elements after arr[i] are also going to be greater than ‘res’.
@@ -1615,7 +1645,7 @@ void nextPermutation(vector<int> &nums)
     while (i > 0 && nums[i] <= nums[i - 1])
         i--;
 
-    //if array is completlely descending
+    //if array is completely descending
     if (i == 0)
     {
         sort(nums.begin(), nums.end());
@@ -1748,7 +1778,7 @@ int numOfSubarrays(vector<int> &arr, int k, int threshold)
 // 689. Maximum Sum of 3 Non-Overlapping Subarrays
 /*
 Use Subarray sum array, prefix array, suffix array to get the three non overlapping windows
-In prefix an dsuffix we store the index so that we can get lexicographically smallest
+In prefix and suffix we store the index so that we can get lexicographically smallest
 */
 vector<int> maxSumOfThreeSubarrays(vector<int> &nums, int k)
 {
@@ -1852,12 +1882,16 @@ int minMerge(vector<int> &arr)
     int i = 0, j = n - 1;
     while (i < j)
     {
+        // If right element is greater, then
+        // we merge left two elements
         if (arr[i] < arr[j])
         {
             arr[i + 1] = arr[i + 1] + arr[i];
             count++;
             i++;
         }
+        // If left element is greater, then
+        // we merge right two elements
         else if (arr[i] > arr[j])
         {
             arr[j - 1] = arr[j - 1] + arr[j];
@@ -1918,9 +1952,9 @@ void reorder(vector<int> &arr, vector<int> &index)
 
 // Rearrange an array in maximum minimum form
 /*
-All evcen index have max element, and odd have min element
-We encode each elemenrt with arr[i] += (arr[max_index] % max_element * max_element) for even index
-and encode each elemenrt with arr[i] += (arr[min_index] % max_element * max_element) for odd index
+All even index have max element, and odd have min element
+We encode each element with arr[i] += (arr[max_index] % max_element * max_element) for even index
+and encode each element with arr[i] += (arr[min_index] % max_element * max_element) for odd index
 How does expression “arr[i] += arr[max_index] % max_element * max_element” work ?
 The purpose of this expression is to store two elements at index arr[i].
 arr[max_index] is stored as multiplier and “arr[i]” is stored as remainder.

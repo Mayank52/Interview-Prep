@@ -783,7 +783,32 @@ update gap
 */
 void merge(int arr1[], int arr2[], int n, int m)
 {
-    int gap = (n + m + 1) / 2;
+    // int gap = (n + m + 1) / 2; //gives ceil in case of odd, and normal number in even  case
+
+    for (int gap = (n + m + 1) / 2; gap > 0; gap = (gap == 1) ? 0 : (gap + 1) / 2)
+    {
+        int i;
+        for (i = 0; i + gap < n; i++)
+        {
+            if (arr1[i] > arr1[i + gap])
+                swap(arr1[i], arr1[i + gap]);
+        }
+
+        if (gap >= n)
+            i = 0;
+
+        for (int idx1 = i, idx2 = (i + gap) % n; idx1 < n && idx2 < m; idx1++, idx2++)
+        {
+            if (arr1[idx1] > arr2[idx2])
+                swap(arr1[idx1], arr2[idx2]);
+        }
+
+        for (int j = 0; j + gap < m; j++)
+        {
+            if (arr2[j] > arr2[j + gap])
+                swap(arr2[j], arr2[j + gap]);
+        }
+    }
 }
 
 // Sort an array according to count of set bits
