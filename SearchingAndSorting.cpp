@@ -5,6 +5,7 @@
 #include <set>
 #include <map>
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 
@@ -987,6 +988,64 @@ string largestMultipleOfThree(vector<int> &digits)
         return "0";
 
     return res;
+}
+
+// Find pair with greatest product in array
+/*
+make a freq map of all elements in array and sort the array
+start from end of array, for element at i, check from 0 till arr[j]<=sqrt(arr[i])
+product=arr[i], num1=arr[j], num2=arr[i]/arr[j]
+if mp[num2]>0 then we found the ans
+
+Case:
+1. Product, num1,num2 are all different, so mp[num2]>0 gives ans
+2. num1==num2, then mp[num1]>1 gives ans
+3. num1==1 , then num2==product, so mp[product]>1 gives ans
+
+Eg. 1 93 1 5
+here no ans
+
+but in 1 93 93 5
+here ans is 93, as there are two 93
+
+*/
+int largestProduct(vector<int> &arr)
+{
+    int n = arr.size();
+    unordered_map<int, int> mp;
+
+    for (int ele : arr)
+        mp[ele]++;
+
+    sort(arr.begin(), arr.end());
+
+    for (int i = n - 1; i > 1; i--)
+    {
+        for (int j = 0; j < i && arr[j] <= sqrt(arr[i]); j++)
+        {
+
+            //if not divisible, skip
+            if (arr[i] % arr[j] != 0)
+                continue;
+
+            int num1 = arr[j];
+            int num2 = arr[i] / arr[j];
+
+            //cases for num1==1
+            if (num1 == 1 && mp[num2] > 1)
+                return arr[i];
+            else if (num1 == 1 && mp[num2] <= 1)
+                continue;
+            
+            //cases for num2==1 && num2!=num1
+            else if (num2 != num1 && mp[num2] > 0)
+                return arr[i];
+            else if (num2 == num1 && mp[num2] > 1)
+                return arr[i];
+        }
+    }
+
+    return -1;
 }
 
 void solve()
