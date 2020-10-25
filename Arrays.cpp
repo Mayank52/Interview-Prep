@@ -367,7 +367,7 @@ vector<vector<int>> kSmallestPairs(vector<int> &nums1, vector<int> &nums2, int k
 
     //for each pair removed from PQ push the pair with next largest sum into it
     //we have a choice to add either (i,j+1) or (i+1,j), but we only add (i,j+1)
-    //as the (i+1,j) we already be in the PQ or not qualified. 
+    //as the (i+1,j) we already be in the PQ or not qualified.
     //PQ is of size K
     while (k-- > 0 && pq.size() != 0)
     {
@@ -2051,6 +2051,83 @@ vector<int> duplicates(int arr[], int n)
 
     if (res.size() == 0)
         return {-1};
+    return res;
+}
+
+// 239. Sliding Window Maximum
+/*Approach 1- Using PQ O(nlogn)
+if we remove the out of bound element each time, and maintain a PQ of size K
+then time is O(nlogk)
+but for that we have to implement our own PQ
+*/
+vector<int> maxSlidingWindow(vector<int> &nums, int k)
+{
+    vector<int> res;
+    priority_queue<vector<int>, vector<vector<int>>> pq; //max heap
+
+    int i = 0;
+    //add elements of first window to PQ
+    for (i = 0; i < k; i++)
+        pq.push({nums[i], i});
+    //top of PQ will contain the window max
+    res.push_back(pq.top()[0]);
+
+    for (; i < nums.size(); i++)
+    {
+        //push current element to PQ
+        pq.push({nums[i], i});
+
+        //while the top of PQ i.e. max element is out of current window, remove it
+        while (pq.top()[1] <= i - k)
+            pq.pop();
+
+        //push the current max element into res
+        res.push_back(pq.top()[0]);
+    }
+
+    return res;
+}
+//Approach 2- Using Deque O(n), or any double ended queue like data structure
+/*
+Add the index in queue
+at every index, if the front of queue has element out of current window i.e. <=(i-k), then remove it
+before adding the new element at the end of queue, remove all elements less than current element from the back
+so the front of queue will always have the max element of the current window
+*/
+vector<int> maxSlidingWindow(vector<int> &nums, int k)
+{
+    vector<int> res;
+    list<int> que;
+    int i;
+
+    //add elements of first window
+    for (i = 0; i < k; i++)
+    {
+        //remove all elements from end that are less than current element
+        while (que.size() > 0 && nums[que.back()] < nums[i])
+            que.pop_back();
+        que.push_back(i);
+    }
+
+    res.push_back(nums[que.front()]);
+
+    for (; i < nums.size(); i++)
+    {
+        //remove first element if its index is out of current window
+        if (que.size() > 0 && que.front() <= (i - k))
+            que.pop_front();
+
+        //remove all elements from end that are less than current element
+        while (que.size() > 0 && nums[que.back()] < nums[i])
+            que.pop_back();
+
+        //add the current element
+        que.push_back(i);
+
+        //front of que is max element of window
+        res.push_back(nums[que.front()]);
+    }
+
     return res;
 }
 

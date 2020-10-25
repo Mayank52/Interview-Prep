@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <list>
 #include <set>
+#include <map>
 #include <algorithm>
 
 using namespace std;
@@ -867,6 +868,125 @@ int findAns(vector<long> &nums1, vector<long> &nums2, long k)
             return 0;
 
     return 1;
+}
+
+// Minimum number of swaps required to sort an array
+//Approach 1- Using Graphs (Not done)
+int minSwaps(int arr[], int N)
+{
+    return 0;
+}
+//Approach 2- O(nlogn)
+/*
+copy the array to a temp array, and sort the temp array
+then make a hashmap of ele:correct index
+then for each index i keep swapping until correct element is at ith index
+*/
+int minSwaps(int arr[], int N)
+{
+    int temp[N];
+    unordered_map<int, int> mp;
+    for (int i = 0; i < N; i++)
+    {
+        temp[i] = arr[i];
+    }
+
+    sort(temp, temp + N);
+
+    for (int i = 0; i < N; i++)
+    {
+        mp[temp[i]] = i;
+    }
+
+    int count = 0;
+    for (int i = 0; i < N; i++)
+    {
+        while (arr[i] != temp[i])
+        {
+            swap(arr[i], arr[mp[arr[i]]]);
+            count++;
+        }
+    }
+
+    return count;
+}
+
+// 1363. Largest Multiple of Three
+/*
+Obviously, trying combinations of numbers won't work as we can have up to 10,000 numbers. Luckily, there is a handy divisibility test:
+A number is divisible by 3 if the sum of all its digits is divisible by 3.
+Observation 1: since the order does not matter, the largest number can be formed by adding digits from largest (9) to smallest (0), e.g. 9999966330000.
+Therefore, we can just count the occurrences of each digit, and then generate the string.
+
+Observation 2: we need to use all digits to form the maximum number.
+If we sum all digits, and the modulo of 3 is not zero, we need to remove 1 (preferably) or 2 smallest digits.
+If modulo 3 of the sum is 1, for example, we will try to remove 1, 4, or 7, if exists, or two of 2, 5, or 8.
+
+More examples:
+9965341 % 3 == 1; we remove 1 to get the largest number.
+9952000 % 3 == 1; now we need to remove two digits, 2 and 5, as there is no 1, 4, or 7.
+These observations yield the following algorithm.
+
+Significance of sequence in m1[] = {1, 4, 7, 2, 5, 8}, m2[] = {2, 5, 8, 1, 4, 7}
+If sum%3 == 1 then priority should be removing 1,4,7 before removing 2,5,8 as mentioned in m1.
+If sum%3 == 2 then priority should be removing 2,5,8 before removing 1,4,7 as mentioned in m2.
+*/
+string largestMultipleOfThree(vector<int> &digits)
+{
+    if (digits.size() == 0)
+        return "0";
+
+    int m1[] = {1, 4, 7, 2, 5, 8}, m2[] = {2, 5, 8, 1, 4, 7};
+
+    //make a freq array of all digits, and also get the total Sum
+    int sum = 0;
+    vector<int> freq(10, 0);
+    for (auto d : digits)
+    {
+        freq[d]++;
+        sum += d;
+    }
+
+    //remove the numbers until sum is divisible be 3
+    while (sum % 3 != 0)
+    {
+        //if remainder is 1 -> remove numbers from m1
+        if (sum % 3 == 1)
+        {
+            for (int num : m1)
+            {
+                if (freq[num] > 0)
+                {
+                    freq[num]--;
+                    sum -= num;
+                    break;
+                }
+            }
+        }
+        //if remainder is 2 -> remove numbers from m2
+        else
+        {
+            for (int num : m2)
+            {
+                if (freq[num] > 0)
+                {
+                    freq[num]--;
+                    sum -= num;
+                    break;
+                }
+            }
+        }
+    }
+
+    string res = "";
+    for (int i = 9; i >= 0; i--)
+        while (freq[i]-- > 0)
+            res += i + '0';
+
+    if (res[0] == '0')
+        return "0";
+
+    return res;
 }
 
 void solve()
