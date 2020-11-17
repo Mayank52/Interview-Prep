@@ -1491,10 +1491,31 @@ vector<int> pathInZigZagTree(int label)
     return path;
 }
 
+// 1448. Count Good Nodes in Binary Tree
+int goodNodes(TreeNode *node, int maxVal)
+{
+    if (node == nullptr)
+        return 0;
+
+    //get count of goodNodes on left and right
+    int leftCount = goodNodes(node->left, max(maxVal, node->val));
+    int rightCount = goodNodes(node->right, max(maxVal, node->val));
+
+    //if this node is also a good node
+    if (node->val >= maxVal)
+        return leftCount + rightCount + 1;
+
+    //if this node is not a good node
+    return leftCount + rightCount;
+}
+int goodNodes(TreeNode *root)
+{
+    return goodNodes(root, -1e8);
+}
+
 // 1443. Minimum Time to Collect All Apples in a Tree
 int minTime(int n, vector<vector<int>> &edges, vector<bool> &hasApple)
 {
-    
 }
 
 // ===============================================================================================================================

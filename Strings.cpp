@@ -468,7 +468,149 @@ string nonPalindromeSubstring(string &str)
         return str;
 }
 
+// Count of words whose i - th letter is either(i - 1) - th, i - th, or (i + 1) - th letter of given word
+/*
+For each letter we have 3 possibilities: 1,2,3 depending on if i-1, i, i+1 element are same or not
+for first and last letter we have two possibilities: 1,2
+so we check if we they are equal and multipy it with the total count;
 
+for eg:
+"abc": 2x3x2=12
+"aaa": 1x1x1=1
+"ab": 2x2=4
+*/
+int countLetters(string &str)
+{
+    if (str.size() == 0)
+        return 0;
+
+    int n = str.size();
+
+    int count;
+    count = (str[0] == str[1]) ? 1 : 2;
+    if (n == 1)
+        return count;
+
+    count *= (str[n - 1] == str[n - 2]) ? 1 : 2;
+
+    for (int i = 1; i < str.size() - 1; i++)
+    {
+        int distinctLetters = 3;
+        if (str[i] == str[i - 1] || str[i] == str[i + 1] || str[i - 1] == str[i + 1])
+            distinctLetters = 2;
+        if (str[i] == str[i - 1] && str[i] == str[i + 1])
+            distinctLetters = 1;
+
+        count *= distinctLetters;
+    }
+
+    return count;
+}
+
+// Print all distinct characters of a string in order
+// Question for submission is different, this is the solution for the submission
+void prefixFreqCount(string &str, vector<vector<int>> &preFreq)
+{
+    int n = str.size();
+
+    vector<int> currFreq(26, 0);
+
+    for (int i = 0; i < n; i++)
+    {
+        currFreq[str[i] - 'a']++;
+        preFreq[i] = currFreq;
+    }
+}
+void countDistinctLetters(string &str, vector<vector<int>> &queries)
+{
+    int n = str.size();
+    vector<int> res;
+
+    //make prefix freq count array
+    vector<vector<int>> preFreq(n, vector<int>(26, 0));
+    prefixFreqCount(str, preFreq);
+
+    //get ans for all queries
+    for (int i = 0; i < queries.size(); i++)
+    {
+        int count = 0;
+        int l = queries[i][0] - 1; //left index of window
+        int r = queries[i][1] - 1; //right index of window
+
+        vector<int> leftFreq(26, 0);
+        vector<int> rightFreq = preFreq[r];
+
+        //left freq array will be (left index - 1), if leftIndex!=0
+        if (l != 0)
+            leftFreq = preFreq[l - 1];
+
+        //remove all the characters on the left of current interval in query
+        //and count the distinct characters
+        for (int j = 0; j < 26; j++)
+        {
+            if (leftFreq[j] == 0 && rightFreq[j] == 0)
+                continue;
+
+            else if (abs(leftFreq[j] - rightFreq[j]) > 0)
+                count++;
+        }
+
+        res.push_back(count);
+    }
+
+    for (int i = 0; i < res.size(); i++)
+        cout << res[i] << " ";
+}
+
+// Min flips of continuous characters to make all characters same in a string
+/*
+Count the number of contiguos sequence of 0s and 1s
+ans is min of the two counts
+*/
+int minFlips(string &str)
+{
+    int n = str.size();
+
+    int zeroCount = 0, oneCount = 0;
+
+    for (int i = 0; i < n - 1; i++)
+    {
+        //if the currEle != nextEle, then one sequence is over
+        if (str[i] != str[i + 1])
+        {
+            //if currEle is 0 then it was a sequence of 0
+            if (str[i] == '0')
+                zeroCount++;
+
+            //if currEle is 1 then it was a sequence of 1
+            else
+                oneCount++;
+        }
+    }
+
+    //to include the last sequence
+    if (str[n - 1] == '0')
+        zeroCount++;
+    else
+        oneCount++;
+
+    return min(zeroCount, oneCount);
+}
+
+//Strings with DP==========================================================================
+// 647. Palindromic Substrings
+int countSubstrings(string s)
+{
+}
+
+// Count binary strings with k times appearing adjacent two set bits
+int countStrings_(int n, int k)
+{
+    
+}
+int countStrings(int n, int k)
+{
+}
 
 void solve()
 {
