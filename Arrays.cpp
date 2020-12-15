@@ -2198,6 +2198,33 @@ int numTimesAllBlue(vector<int> &light)
 
     return count;
 }
+
+// 769. Max Chunks To Make Sorted
+/*
+The smallest chunk is where for range (a....b), all numbers in range [a,b] are within that chunk
+So if the maxTillNow==i, this means everything in range (0...maxTillNow) has occured
+So this gives the smallest chunk.
+For eg - [0,4,3,1,2]
+Here there are two chunks : (0) , (4,3,1,2)
+
+Because for increasing order, at any index i, if ith element is not maxtillNow, that means everything till now is not sorted
+So they are all part of one chunk.
+*/
+int maxChunksToSorted(vector<int> &arr)
+{
+    int n = arr.size();
+    int maxTillNow = 0, count = 0;
+
+    for (int i = 0; i < arr.size(); i++)
+    {
+        maxTillNow = max(arr[i], maxTillNow);
+        if (maxTillNow == i)
+            count++;
+    }
+
+    return count;
+}
+
 void solve()
 {
 }
