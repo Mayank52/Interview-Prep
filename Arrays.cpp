@@ -2131,6 +2131,73 @@ vector<int> maxSlidingWindow(vector<int> &nums, int k)
     return res;
 }
 
+// 1375. Bulb Switcher III
+int numTimesAllBlue(vector<int> &light)
+{
+    int n = light.size();
+    int blueBulbs = 0, onBulbs = 0, count = 0;
+    vector<int> bulbs(n, 0); //1: ON, 2: blue, 0: OFF
+
+    for (int i = 0; i < light.size(); i++)
+    {
+        int bulbNo = light[i] - 1;
+        if (bulbNo == 0)
+        {
+            bulbs[0] = 2;
+            blueBulbs++;
+            int b = bulbNo + 1;
+            while (b < n && bulbs[b] == 1)
+            {
+                bulbs[b] = 2;
+                b++;
+                blueBulbs++;
+            }
+        }
+        else if (bulbs[bulbNo - 1] == 2)
+        {
+            bulbs[bulbNo] = 2;
+            blueBulbs++;
+            int b = bulbNo + 1;
+            while (b < n && bulbs[b] == 1)
+            {
+                bulbs[b] = 2;
+                b++;
+                blueBulbs++;
+            }
+        }
+        else
+            bulbs[bulbNo] = 1;
+
+        onBulbs++;
+
+        if (blueBulbs == onBulbs)
+            count++;
+    }
+
+    return count;
+}
+//Better Approach - O(n), O(1)
+/*
+Only moment when all the bulbs are blue is if,
+The rightmost turned on bulb is blue, as this means that every bulb before it is blue.
+the condition for this is (rightMostBulb == i+1)
+Because at any index i, if the rightmost ON bulb is more than i+1(because of 1 based index)
+then all bulbs are not blue, as rightMost bulb>i+1,
+which means total ON bulbs is less than rightMost ON bulb.
+*/
+int numTimesAllBlue(vector<int> &light)
+{
+    int rightMostBulb = light[0], count = 0;
+
+    for (int i = 0; i < light.size(); i++)
+    {
+        rightMostBulb = max(light[i], rightMostBulb);
+        if (rightMostBulb == i + 1)
+            count++;
+    }
+
+    return count;
+}
 void solve()
 {
 }

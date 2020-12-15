@@ -597,6 +597,54 @@ int minFlips(string &str)
     return min(zeroCount, oneCount);
 }
 
+// 1576. Replace All ?'s to Avoid Consecutive Repeating Characters
+string modifyString(string s)
+{
+    int n = s.size();
+    if (s[0] == '?')
+    {
+        for (int j = 0; j < 26; j++)
+        {
+            char ch = s[0] + 'a';
+            if (ch != s[1])
+            {
+                s[0] == ch;
+                break;
+            }
+        }
+    }
+    for (int i = 1; i < s.size() - 1; i++)
+    {
+        if (s[i] == '?')
+        {
+            for (int j = 0; j < 26; j++)
+            {
+                char ch = j + 'a';
+                if (ch != s[i - 1] && ch != s[i + 1])
+                {
+                    s[i] == ch;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (s[n - 1] == '?')
+    {
+        for (int j = 0; j < 26; j++)
+        {
+            char ch = s[n - 1] + 'a';
+            if (ch != s[n - 2])
+            {
+                s[n - 2] == ch;
+                break;
+            }
+        }
+    }
+
+    return s;
+}
+
 //Strings with DP==========================================================================
 // 647. Palindromic Substrings
 int countSubstrings(string s)
@@ -606,7 +654,6 @@ int countSubstrings(string s)
 // Count binary strings with k times appearing adjacent two set bits
 int countStrings_(int n, int k)
 {
-    
 }
 int countStrings(int n, int k)
 {
